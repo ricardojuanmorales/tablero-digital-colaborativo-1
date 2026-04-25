@@ -1,0 +1,119 @@
+{
+  "_comment": "Tablero MVP v1.0 — Estructura de datos. En producción este archivo se reemplaza por PostgreSQL.",
+  "boards": [
+    {
+      "id": "board-001",
+      "title": "Campaña Q2",
+      "icon": "📣",
+      "color": "#EDE9FE",
+      "privacy": "team",
+      "createdAt": "2026-04-01T10:00:00Z",
+      "updatedAt": "2026-04-24T15:30:00Z"
+    },
+    {
+      "id": "board-002",
+      "title": "Investigación UX",
+      "icon": "🔍",
+      "color": "#D1FAE5",
+      "privacy": "private",
+      "createdAt": "2026-04-05T09:00:00Z",
+      "updatedAt": "2026-04-23T11:00:00Z"
+    },
+    {
+      "id": "board-003",
+      "title": "Roadmap 2026",
+      "icon": "🗺",
+      "color": "#FEF3C7",
+      "privacy": "team",
+      "createdAt": "2026-04-10T08:00:00Z",
+      "updatedAt": "2026-04-22T16:45:00Z"
+    },
+    {
+      "id": "board-004",
+      "title": "Brainstorm app",
+      "icon": "💡",
+      "color": "#FFE4E6",
+      "privacy": "public",
+      "createdAt": "2026-04-15T14:00:00Z",
+      "updatedAt": "2026-04-25T09:00:00Z"
+    }
+  ],
+  "posts": {
+    "board-001": [
+      {
+        "id": "post-001",
+        "boardId": "board-001",
+        "title": "Onboarding simplificado",
+        "content": "Reducir pasos de registro a 3 máximo.",
+        "tag": "UX",
+        "color": "purple",
+        "kanbanCol": "in-progress",
+        "createdAt": "2026-04-20T10:00:00Z"
+      },
+      {
+        "id": "post-002",
+        "boardId": "board-001",
+        "title": "Boards ilimitados gratis",
+        "content": "Ventaja competitiva frente a Padlet.",
+        "tag": "Negocio",
+        "color": "teal",
+        "kanbanCol": "done",
+        "createdAt": "2026-04-21T11:00:00Z"
+      },
+      {
+        "id": "post-003",
+        "boardId": "board-001",
+        "title": "IA para organizar tarjetas",
+        "content": "Agrupar posts similares automáticamente.",
+        "tag": "IA",
+        "color": "amber",
+        "kanbanCol": "todo",
+        "createdAt": "2026-04-22T09:00:00Z"
+      },
+      {
+        "id": "post-004",
+        "boardId": "board-001",
+        "title": "App móvil nativa",
+        "content": "React Native compartiendo lógica con web.",
+        "tag": "Producto",
+        "color": "coral",
+        "kanbanCol": "todo",
+        "createdAt": "2026-04-23T14:00:00Z"
+      },
+      {
+        "id": "post-005",
+        "boardId": "board-001",
+        "title": "Modo offline",
+        "content": "PWA con sincronización al reconectar.",
+        "tag": "Técnico",
+        "color": "pink",
+        "kanbanCol": "review",
+        "createdAt": "2026-04-24T10:00:00Z"
+      }
+    ],
+    "board-002": [],
+    "board-003": [],
+    "board-004": []
+  },
+  "schema": {
+    "board": {
+      "id": "string (uuid)",
+      "title": "string",
+      "icon": "string (emoji)",
+      "color": "string (hex)",
+      "privacy": "enum: public | team | private",
+      "createdAt": "ISO 8601 datetime",
+      "updatedAt": "ISO 8601 datetime"
+    },
+    "post": {
+      "id": "string (uuid)",
+      "boardId": "string (ref board.id)",
+      "title": "string",
+      "content": "string",
+      "tag": "string",
+      "color": "enum: purple | teal | amber | coral | pink | gray",
+      "kanbanCol": "enum: todo | in-progress | review | done",
+      "createdAt": "ISO 8601 datetime"
+    }
+  }
+}
