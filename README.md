@@ -1,110 +1,232 @@
-# Tablero — MVP v1.0
+# 🗂 Tablero — MVP v1.1
 
-> Aplicación de tablero colaborativo. Gratis para todos, siempre.
+> **Tableros colaborativos visuales. Gratis para todos, siempre.**
 
----
-
-## Descripción
-
-Tablero es una app de tablero digital que permite organizar ideas, posts e información en múltiples formatos visuales. Combina lo mejor de Padlet (layouts visuales), Wakelet (sin límites gratis) y Miro (colaboración fluida), con una capa de inteligencia artificial para organizar el contenido automáticamente.
-
-Esta versión **MVP v1.0** es un monolito HTML + JSON pensado para validar el producto rápidamente antes de construir el backend completo.
+Tablero es una app de organización visual que combina lo mejor de Padlet, Wakelet y Miro — con templates inteligentes, tres vistas de visualización y una capa de IA simulada lista para conectar a Claude en v2.0.
 
 ---
 
-## Funcionalidades del MVP
+## ✨ Funcionalidades
 
-### Tableros
-- Crear, editar y eliminar boards
-- Tres niveles de privacidad: `público`, `equipo`, `privado`
-- Personalización de ícono y color de portada
+### 🏠 Pantalla de inicio
+- Grilla de tableros en formato **3 columnas** (responsive: 2 en tablet, 1 en móvil)
+- Cada tarjeta muestra **ícono**, **título**, **descripción**, contador de posts y badge de privacidad
+- Menú contextual **⋯** en cada tarjeta con opciones: Abrir, Editar y Eliminar
+- Modal de confirmación al eliminar — nunca se borra por accidente
+- Botón **+ Nuevo tablero** siempre visible con acceso directo a templates
+- Contador total de tableros en el encabezado
 
-### Posts / Tarjetas
-- Crear, editar y eliminar posts dentro de cada board
-- Campos: título, contenido, etiqueta y color de acento
-- Columna Kanban asignable por post
+### 📋 Tableros
+- **Crear** tableros con nombre, descripción, ícono, color de portada y privacidad
+- **Editar** cualquier propiedad después de creado
+- **Eliminar** desde el menú ⋯ del home o desde el modal de edición
+- **32 íconos** disponibles: 💡📣🔍🗺📋🎯🚀📊✏️🌟📝🎨🧠🔥⚡🌈🎪🏆🦋🌸🎵🎬🧩📌🌍💎🔮🎉🛠📐🌱🦄
+- **6 colores alegres** de portada: amarillo ☀️, verde menta 🌿, celeste 🩵, rosa 🌸, violeta 💜, verde agua 🌊
+- **3 niveles de privacidad**: 🌐 Público · 👥 Solo equipo · 🔒 Privado
+- Botón **← Mis tableros** siempre visible para volver al home
 
-### Layouts
-| Layout | Descripción |
-|--------|-------------|
-| `Muro` | Grid libre de tarjetas con color de acento |
-| `Kanban` | Columnas de flujo: Por hacer → En progreso → Revisión → Listo |
-| `Línea de tiempo` | Vista de fases del proyecto en barras horizontales |
+### 🃏 Posts / Tarjetas
+Cada post contiene cuatro campos:
 
-### Onboarding
-- Flujo de 5 pasos en la primera visita
-- Selección de rol, nombre, avatar, plantilla inicial, privacidad e invitaciones
-- Datos guardados en `localStorage`
+| Campo | Descripción |
+|-------|-------------|
+| **Título** | Texto principal en 15px bold — destaca visualmente |
+| **Descripción** | Texto de apoyo en 12px — detalle de la idea |
+| **🖼 Imagen** | URL de imagen (Unsplash, Pexels, Imgur, carpeta `/images`) |
+| **🔗 Fuente** | Enlace a la fuente original — botón "Fuente" en la tarjeta |
 
-### Sugerencias IA (simuladas)
-- Panel de chips en la parte inferior del board
-- En el MVP: las sugerencias son estáticas y abren prompts guiados
-- En v2.0: conectar a Claude API para agrupación semántica real
+- **10 colores de acento**: violet 💜 teal 🩵 amber 🟡 coral 🔴 pink 🩷 gray ⚫ blue 🔵 lime 🟢 orange 🟠 cyan 🩵
+- **Columna de flujo** asignable según el template del tablero
+- Crear, editar y eliminar desde cualquier vista
+
+### 👁 Tres vistas de visualización
+
+#### 🧱 Vista Muro
+Grid de tarjetas visuales con imagen de portada, título, descripción breve y botón de fuente. Ideal para lluvia de ideas y colecciones visuales.
+
+#### 📊 Vista Kanban
+Columnas de flujo con tarjetas por estado. Las columnas cambian automáticamente según el template del tablero — ver sección de Templates más abajo.
+
+#### 📅 Vista Línea de tiempo
+Vista dinámica basada en los posts reales del tablero:
+- Cada **fila** es un post con su título y color de acento
+- La **barra** avanza horizontalmente según la columna asignada
+- El **encabezado** muestra las columnas del template como eje X
+- **Leyenda** de colores al pie
+- Clic en cualquier fila abre el modal de edición
 
 ---
 
-## Arquitectura del MVP (Monolito)
+## 🎨 Templates disponibles
+
+Al crear un tablero nuevo se presentan **6 templates** con columnas y posts de ejemplo incluidos. Al seleccionar uno, el ícono, color de portada y nombre se auto-completan, y la vista por defecto se aplica automáticamente al abrir el tablero.
+
+### 📋 Kanban
+> Flujo clásico de gestión de tareas
+
+| Por hacer | En progreso | Revisión | Listo |
+|-----------|-------------|----------|-------|
+
+### 💡 Tormenta de ideas
+> Muro libre para capturar y filtrar ideas
+
+| Explorar | Profundizar | Seleccionada | Descartada |
+|----------|-------------|--------------|------------|
+
+### 🗂 Estructura jerárquica
+> Organización por niveles de detalle
+
+| Raíz | Rama | Hoja |
+|------|------|------|
+
+### 🎨 Canvas libre
+> Espacio en blanco sin estructura predefinida
+
+| Zona A | Zona B | Zona C | Zona D |
+|--------|--------|--------|--------|
+
+### 🗺 Roadmap
+> Fases de un proyecto de principio a fin
+
+| Planificación | Diseño | Implementación | Evaluación |
+|---------------|--------|----------------|------------|
+
+### ✦ En blanco
+> Sin estructura, para que definas la tuya
+
+| Columna 1 | Columna 2 | Columna 3 |
+|-----------|-----------|-----------|
+
+---
+
+## 🤖 Sugerencias IA (simuladas)
+
+Panel de chips en la parte inferior de cada tablero:
+
+- 🔍 **Agrupa ideas similares** — detecta etiquetas comunes en el board
+- 🏷 **Sugiere etiquetas** — *(v2.0: Claude API con NLP)*
+- 📝 **Genera resumen del board** — título + conteo + temas detectados
+- 🔄 **Detecta temas repetidos** — cruza etiquetas duplicadas
+- ⚡ **Propón siguiente acción** — *(v2.0: Claude API contextual)*
+
+---
+
+## 💾 Exportar / Importar
+
+Botón **⬇ Exportar / Importar** disponible en la barra superior tanto en el home como dentro de cualquier tablero.
+
+**⬇ Exportar:**
+- Descarga `tablero-backup-YYYY-MM-DD.json` con todos tus tableros, posts y perfil
+- Preview del JSON antes de confirmar con peso estimado en KB
+
+**⬆ Importar:**
+- Zona de drag & drop o selector de archivo `.json`
+- Valida el formato antes de habilitar el botón
+- Dos modos:
+  - 🔀 **Combinar** — agrega tableros sin borrar los actuales (evita duplicados por ID)
+  - 🔄 **Reemplazar** — sustituye todo con el contenido del backup
+
+> Para sincronizar entre dispositivos en el MVP, exporta en un equipo e importa en el otro. En v2.0 esto será automático con el backend.
+
+---
+
+## 🧭 Onboarding (primera visita)
+
+Flujo guiado de **5 pasos** al abrir la app por primera vez:
+
+| Paso | Acción |
+|------|--------|
+| 1️⃣ **Rol** | Educador · Equipo · Creativo · Personal |
+| 2️⃣ **Perfil** | Nombre y color de avatar con preview en tiempo real |
+| 3️⃣ **Template** | Elige el tipo de tablero inicial |
+| 4️⃣ **Privacidad** | Público · Solo equipo · Privado |
+| 5️⃣ **Invitar** | Email de colaboradores *(simulado en MVP)* |
+
+---
+
+## 🖼 Imágenes en los posts
+
+El campo de imagen acepta cualquier URL pública:
+
+| Fuente | Ejemplo de URL | Notas |
+|--------|---------------|-------|
+| **Unsplash** | `https://images.unsplash.com/photo-ID?w=400&q=80` | ⭐ Recomendado — parámetros de tamaño y calidad |
+| **Pexels** | `https://images.pexels.com/photos/ID/...` | Gratuito, alta calidad |
+| **Imgur** | `https://i.imgur.com/ID.jpg` | Sin cuenta requerida |
+| **Carpeta local** | `images/mi-foto.jpg` | Para uso con servidor local o GitHub Pages |
+| **Cloudinary** | URL de Cloudinary | Recomendado para v2.0 |
+
+> **Tip Unsplash:** añade `?w=400&q=80` al final de cualquier URL de Unsplash para obtener una imagen de 400px de ancho con 80% de calidad — ideal para las tarjetas.
+
+---
+
+## 🏗 Arquitectura del MVP
 
 ```
 tablero-mvp/
-├── index.html       ← App completa (HTML + CSS + JS inline)
+├── index.html       ← App completa (HTML + CSS + JS, sin dependencias)
 ├── data.json        ← Datos de ejemplo + esquema de referencia
+├── images/          ← (opcional) Imágenes locales para posts
 └── README.md        ← Esta documentación
 ```
 
-### Almacenamiento
-
-El MVP utiliza `localStorage` como base de datos del cliente:
+### 💿 Almacenamiento en localStorage
 
 | Clave | Tipo | Descripción |
 |-------|------|-------------|
-| `tablero_boards` | `Board[]` | Lista de boards del usuario |
-| `tablero_posts` | `Record<boardId, Post[]>` | Posts indexados por board |
-| `tablero_user` | `User` | Perfil del usuario (onboarding) |
-| `tablero_onboarded` | `boolean` | Si el usuario completó el onboarding |
+| `tb_boards` | `Board[]` | Lista de tableros del usuario |
+| `tb_posts` | `Record<boardId, Post[]>` | Posts indexados por tablero |
+| `tb_user` | `User` | Perfil del usuario |
+| `tb_onboarded` | `boolean` | Si completó el onboarding |
 
-### Esquema de datos
+### 📐 Esquema de datos
 
-```ts
+```typescript
 interface Board {
-  id: string;           // UUID generado en cliente
+  id: string;             // 'b' + Date.now()
   title: string;
-  icon: string;         // Emoji
-  color: string;        // Hex (#RRGGBB)
+  description: string;   // Descripción breve visible en el home
+  icon: string;           // Emoji (32 opciones)
+  color: string;          // Hex — 6 colores alegres de portada
   privacy: 'public' | 'team' | 'private';
-  createdAt: string;    // ISO 8601
-  updatedAt: string;
+  tmpl: string;           // 'kanban' | 'brainstorm' | 'hierarchy' | 'canvas' | 'roadmap' | 'blank'
+  defaultLayout: string;  // 'wall' | 'kanban' | 'timeline'
+  ca: string;             // createdAt ISO 8601
+  ua: string;             // updatedAt ISO 8601
 }
 
 interface Post {
-  id: string;
-  boardId: string;
-  title: string;
-  content: string;
-  tag: string;
-  color: 'purple' | 'teal' | 'amber' | 'coral' | 'pink' | 'gray';
-  kanbanCol: 'todo' | 'in-progress' | 'review' | 'done';
-  createdAt: string;
+  id: string;             // 'p' + Date.now()
+  bid: string;            // boardId de referencia
+  title: string;          // Título principal (bold)
+  content: string;        // Descripción breve
+  tag: string;            // Etiqueta libre
+  image: string;          // URL de imagen (opcional)
+  src: string;            // URL de fuente original (opcional)
+  color: 'violet' | 'teal' | 'amber' | 'coral' | 'pink' |
+         'gray' | 'blue' | 'lime' | 'orange' | 'cyan';
+  kc: string;             // ID de columna según template del tablero
+  ca: string;             // createdAt ISO 8601
 }
 
 interface User {
   name: string;
-  avatarColor: string;
+  avatarColor: string;    // Hex
   role: 'edu' | 'team' | 'creative' | 'personal';
 }
 ```
 
 ---
 
-## Cómo ejecutar
+## 🚀 Cómo ejecutar
 
-### Opción 1 — Abrir directamente
+### Opción 1 — Abrir directamente (más simple)
 ```bash
 open index.html
 ```
-> Funciona en cualquier navegador moderno sin servidor.
+Funciona en cualquier navegador moderno sin necesidad de servidor.
 
-### Opción 2 — Con servidor local (recomendado)
+### Opción 2 — Servidor local (recomendado para imágenes locales)
 ```bash
 # Python
 python3 -m http.server 3000
@@ -112,94 +234,115 @@ python3 -m http.server 3000
 # Node.js
 npx serve .
 
-# VS Code
-# Instalar extensión "Live Server" y hacer clic en "Go Live"
+# VS Code → extensión "Live Server" → clic en "Go Live"
 ```
+Luego abrir `http://localhost:3000`
 
-Luego abrir `http://localhost:3000` en el navegador.
+### Opción 3 — GitHub Pages (producción MVP)
+1. Sube el repositorio a GitHub
+2. Ve a **Settings → Pages → Branch: main / root**
+3. La app queda disponible en `https://usuario.github.io/tablero-mvp`
 
 ---
 
-## Decisiones de diseño del MVP
+## ⚙️ Decisiones de diseño
 
 ### Por qué monolito HTML
-- Cero dependencias, cero configuración
-- Desplegable en cualquier CDN estático (GitHub Pages, Netlify, Vercel)
-- Permite validar el producto con usuarios reales en horas, no semanas
-- Migración limpia a Next.js cuando se necesite backend
+- ✅ Cero dependencias, cero configuración, cero build step
+- ✅ Desplegable en GitHub Pages, Netlify o Vercel en segundos
+- ✅ Valida el producto con usuarios reales en horas, no semanas
+- ✅ Migración limpia a Next.js cuando se necesite backend real
 
 ### Por qué localStorage y no una API
-- El MVP valida flujos de UX, no infraestructura
-- No requiere backend, base de datos ni autenticación
-- Los datos de prueba se pueden sembrar desde `data.json`
-- En v2.0 se reemplaza por llamadas a la API REST
+- ✅ El MVP valida flujos de UX, no infraestructura
+- ✅ Sin backend, sin base de datos, sin autenticación
+- ✅ Exportar / Importar JSON cubre sincronización básica entre dispositivos
+- 🔄 Se reemplaza en v2.0 tocando únicamente `guardar()` y `cargar()`
 
-### Limitaciones conocidas
+### ⚠️ Limitaciones conocidas
+
 | Limitación | Solución en v2.0 |
 |------------|-----------------|
-| Datos solo en el dispositivo actual | API REST + PostgreSQL |
-| Sin colaboración en tiempo real | WebSockets (Partykit / Liveblocks) |
-| IA simulada (chips estáticos) | Claude API con embeddings |
-| Sin autenticación real | Auth con JWT + OAuth |
-| Sin upload de archivos | Upload directo a S3 |
+| 💾 Datos solo en el navegador actual | API REST + PostgreSQL |
+| 👥 Sin colaboración en tiempo real | WebSockets (Partykit / Liveblocks) |
+| 📧 Invitaciones simuladas | Sistema real con email (Resend) |
+| 🤖 IA simulada con chips estáticos | Claude API con embeddings semánticos |
+| 🖼 Sin subida de imágenes | Upload drag & drop a Cloudflare R2 |
+| 🔐 Sin autenticación real | Google OAuth + JWT |
 
 ---
 
-## Roadmap
+## 🗺 Roadmap
 
-### v1.0 — MVP (este archivo)
-- [x] Onboarding de 5 pasos
-- [x] CRUD de boards y posts
-- [x] 3 layouts: muro, kanban, línea de tiempo
-- [x] Persistencia en localStorage
-- [x] Sugerencias IA simuladas
-- [x] Privacidad configurable por board
+### ✅ v1.1 — MVP actual
+- [x] Onboarding guiado de 5 pasos
+- [x] CRUD completo de tableros y posts
+- [x] 3 vistas: Muro · Kanban · Línea de tiempo dinámica
+- [x] 6 templates con columnas específicas por tipo
+- [x] Posts con imagen, descripción, etiqueta y enlace a fuente
+- [x] 10 colores de acento · 32 íconos · 6 colores alegres de portada
+- [x] Menú contextual ⋯ con opciones Abrir, Editar, Eliminar
+- [x] Modal de confirmación para eliminar tableros
+- [x] Exportar / Importar JSON (combinar o reemplazar)
+- [x] Botón ← Mis tableros en todos los tableros
+- [x] Pantalla home con grilla 3×2 y descripción de tableros
+- [x] Panel de sugerencias IA simulado
+- [x] Persistencia completa en localStorage
 
-### v1.5 — Backend básico
+### 🔧 v1.5 — Backend básico
 - [ ] API REST con Node.js + Hono
-- [ ] PostgreSQL con Drizzle ORM
+- [ ] PostgreSQL con Drizzle ORM + pgvector
 - [ ] Autenticación con Google OAuth
-- [ ] Deploy en Railway / Render
+- [ ] Row-Level Security para privacidad de tableros
+- [ ] Deploy en Railway / Render / Fly.io
 
-### v2.0 — Colaboración e IA real
-- [ ] WebSockets para edición simultánea
-- [ ] Claude API para agrupación semántica
-- [ ] Upload de imágenes a S3 / R2
-- [ ] Notificaciones por email (Resend)
+### 🤝 v2.0 — Colaboración e IA real
+- [ ] WebSockets para edición simultánea en tiempo real
+- [ ] Sistema de invitaciones por email con Resend
+- [ ] Claude API para sugerencias y agrupación semántica real
+- [ ] Upload de imágenes con drag & drop a Cloudflare R2
+- [ ] Notificaciones push en tiempo real
 
-### v3.0 — Plataforma
-- [ ] Panel educativo institucional
-- [ ] API pública documentada
-- [ ] App móvil (React Native)
-- [ ] Extensión de navegador
-
----
-
-## Convenciones de código
-
-- **Nombres de funciones**: `camelCase` en español descriptivo (`crearBoard`, `eliminarPost`)
-- **IDs**: prefijo por tipo + timestamp (`board-${Date.now()}`, `post-${Date.now()}`)
-- **Estado**: objeto global `state` con una sola fuente de verdad
-- **Renderizado**: funciones `render*()` que actualizan el DOM completo del componente
-- **Persistencia**: función `guardar()` que sincroniza `state` con `localStorage`
+### 🌐 v3.0 — Plataforma
+- [ ] Panel educativo institucional (FERPA · COPPA compliant)
+- [ ] API pública documentada (pay-as-you-go)
+- [ ] App móvil nativa (React Native — código compartido con web)
+- [ ] Extensión de navegador Chrome / Firefox
+- [ ] Marketplace de templates de la comunidad
 
 ---
 
-## Contribuir
+## 🧑‍💻 Convenciones de código
 
-1. Clona el repositorio
-2. Edita `index.html` directamente
-3. Prueba en el navegador con Live Server
-4. Abre un PR con la descripción del cambio
-
-No se necesitan herramientas de build, bundlers ni package managers para el MVP.
+| Elemento | Convención | Ejemplo |
+|----------|-----------|---------|
+| Funciones | camelCase descriptivo | `renderHome()`, `guardarPost()` |
+| IDs | prefijo + timestamp | `'b' + Date.now()` |
+| Estado global | objeto `S` | `S.boards`, `S.posts`, `S.user` |
+| Renderizado | funciones `render*()` | `renderBoard()`, `renderLayout()` |
+| Persistencia | `guardar()` / `cargar()` | Único punto de contacto con localStorage |
+| Modales | `closeModal(event)` | Click en backdrop cierra el modal |
+| Notificaciones | `toast(msg)` | Mensaje flotante de 3.2 segundos |
+| Menús contextuales | `openCtxMenu(e, id)` | Se cierra al hacer click afuera |
 
 ---
 
-## Licencia
+## 🤝 Contribuir
+
+1. Clona el repositorio: `git clone https://github.com/usuario/tablero-mvp`
+2. Abre `index.html` con Live Server en VS Code
+3. Edita el archivo directamente — no hay build step
+4. Prueba en Chrome y Firefox antes de hacer PR
+5. Abre un Pull Request con descripción del cambio y capturas de pantalla
+
+> No se necesitan npm, bundlers ni herramientas de build. Todo vive en un solo archivo HTML de ~1,100 líneas.
+
+---
+
+## 📄 Licencia
 
 MIT — Libre para usar, modificar y distribuir.
 
 ---
 
-*Construido con HTML, CSS, JavaScript vanilla y muchas ganas.*
+*Construido con HTML · CSS · JavaScript vanilla — Diseñado con 💜 y muchas iteraciones*
