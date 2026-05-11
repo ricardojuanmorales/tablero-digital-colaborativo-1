@@ -506,8 +506,8 @@ async function iniciarConSesion(session){
   S.token=session.access_token;
   const u=session.user;
   S.user={name:u.user_metadata?.full_name||u.email,avatarColor:'#4440B8',role:'personal'};
-  // Guardar/actualizar perfil en BD
-  fetch(`${API_URL}/api/users/me`,{
+  // Guardar/actualizar perfil en BD ANTES de cargar boards (FK dependency)
+  await fetch(`${API_URL}/api/users/me`,{
     method:'POST',
     headers:apiHeaders(),
     body:JSON.stringify({email:u.email,name:S.user.name,avatarColor:S.user.avatarColor})
