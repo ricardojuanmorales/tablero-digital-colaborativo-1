@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tablero — MVP v1.0</title>
+<title>Tablero — v1.5</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -15,7 +16,7 @@
   --ffd:'Fraunces',Georgia,serif;--ffb:'DM Sans',system-ui,sans-serif;
   --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
 }
-html{font-family:var(--ffb);font-size:15px;color:var(--text);background:var(--bg)}
+html{font-family:var(--ffb);font-size:16px;color:var(--text);background:var(--bg)}
 button{font-family:var(--ffb);cursor:pointer}
 input,textarea{font-family:var(--ffb)}
 a{color:inherit;text-decoration:none}
@@ -37,11 +38,11 @@ input[type=text]:focus,input[type=email]:focus,textarea:focus{border-color:var(-
 textarea{resize:vertical;min-height:64px}
 
 /* buttons */
-.btn{padding:8px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:500;transition:all .15s}
+.btn{padding:8px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:14px;font-weight:500;transition:all .15s}
 .btn:hover{background:var(--bg);color:var(--text)}
 .btn-p{background:var(--accent);color:#fff;border-color:var(--accent)}
 .btn-p:hover{background:#3735a0}
-.btn-g{border:none;background:transparent;color:var(--muted);padding:6px 10px;font-size:13px}
+.btn-g{border:none;background:transparent;color:var(--muted);padding:6px 10px;font-size:14px}
 .btn-g:hover{color:var(--text);background:var(--bg);border-radius:var(--r)}
 .btn-d{color:#c0392b;border-color:#f5c6c6;background:#fff5f5}
 .btn-d:hover{background:#fee2e2}
@@ -49,6 +50,7 @@ textarea{resize:vertical;min-height:64px}
 /* app shell */
 #app{min-height:100vh;display:flex;flex-direction:column}
 #topbar{height:52px;display:flex;align-items:center;gap:10px;padding:0 20px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100;flex-shrink:0}
+#tb-act{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .logo{font-family:var(--ffd);font-size:20px;font-weight:600;color:var(--accent);letter-spacing:-.5px}
 .logo span{font-style:italic}
 .tsp{flex:1}
@@ -61,6 +63,10 @@ textarea{resize:vertical;min-height:64px}
 .home-h{font-family:var(--ffd);font-size:32px;font-weight:600;margin-bottom:4px;color:var(--text);letter-spacing:-.5px}
 .home-s{font-size:14px;color:var(--muted);line-height:1.5}
 .home-count{font-size:12px;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:20px;padding:4px 12px;white-space:nowrap;align-self:center}
+/* secciones home */
+.home-sec{margin-bottom:36px}
+.home-sec-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px}
+.home-sec-ttl{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
 /* grilla de tableros */
 .bg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 @media(max-width:700px){.bg{grid-template-columns:repeat(2,1fr)}}
@@ -124,17 +130,19 @@ textarea{resize:vertical;min-height:64px}
 
 /* post cards */
 .wall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-.pc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:box-shadow .15s}
+.pc{background:var(--surface);border:2px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:box-shadow .15s,border-color .15s}
 .pc:hover{box-shadow:var(--sh)}
 .pc-acc{height:4px}
 .pc-imgw{overflow:hidden;cursor:pointer}
 .pc-img{width:100%;height:130px;object-fit:cover;display:block;transition:transform .2s}
 .pc:hover .pc-img{transform:scale(1.03)}
 .pc-bod{padding:12px 13px 8px;cursor:pointer}
-.pc-ttl{font-size:15px;font-weight:600;margin-bottom:5px;line-height:1.3;color:var(--text)}
-.pc-txt{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:6px}
-.pc-ft{padding:0 12px 10px;display:flex;align-items:center;justify-content:space-between;gap:6px}
-.pc-tag{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500}
+.pc-ttl{font-size:16px;font-weight:600;margin-bottom:5px;line-height:1.3;color:var(--text)}
+.pc-txt{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:6px}
+.pc-ft{padding:0 12px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.pc-tags{display:flex;flex-wrap:wrap;gap:4px;flex:1}
+.pc-tag{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:500}
+.pc-links{display:flex;gap:4px;flex-shrink:0;flex-wrap:wrap}
 .pc-src{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;padding:3px 8px;border-radius:20px;border:1px solid var(--border);color:var(--muted);background:var(--bg);text-decoration:none;transition:all .12s;white-space:nowrap}
 .pc-src:hover{border-color:var(--accent2);color:var(--accent);background:#f5f4ff}
 
@@ -144,10 +152,10 @@ textarea{resize:vertical;min-height:64px}
 .kc-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
 .kc-t{font-size:11px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.05em}
 .kc-n{font-size:10px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:1px 7px;color:var(--muted)}
-.kcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px;cursor:pointer;transition:box-shadow .12s;overflow:hidden}
+.kcard{background:var(--surface);border:2px solid var(--border);border-radius:var(--r);padding:10px;margin-bottom:6px;cursor:pointer;transition:box-shadow .12s,border-color .15s;overflow:hidden}
 .kcard:hover{box-shadow:var(--sh)}
 .kc-acc{width:100%;height:3px;border-radius:2px;margin-bottom:8px}
-.kc-ttl{font-size:12px;font-weight:500;margin-bottom:3px}
+.kc-ttl{font-size:13px;font-weight:500;margin-bottom:3px}
 
 /* timeline */
 .tlw{display:flex;flex-direction:column;min-width:600px}
@@ -250,6 +258,15 @@ textarea{resize:vertical;min-height:64px}
 .ob-rad.on::after{content:'';width:5px;height:5px;border-radius:50%;background:#fff}
 .ob-ok{text-align:center;padding:16px 0}
 
+/* login */
+#screen-login{flex:1;display:flex;align-items:center;justify-content:center;background:var(--bg);padding:24px}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);width:100%;max-width:380px;padding:40px 32px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,.06)}
+.login-logo{font-family:var(--ffd);font-size:36px;font-weight:600;color:var(--accent);letter-spacing:-.5px;margin-bottom:8px}
+.login-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.5}
+.btn-google{display:inline-flex;align-items:center;gap:10px;padding:12px 24px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:15px;font-weight:500;cursor:pointer;transition:all .15s;width:100%;justify-content:center}
+.btn-google:hover{background:var(--bg);border-color:var(--accent2);color:var(--accent)}
+.login-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:12px}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--border)}
 /* toast */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1C1B1A;color:#fff;padding:10px 18px;border-radius:var(--r);font-size:13px;z-index:300;max-width:480px;text-align:center;animation:fi .2s ease;pointer-events:none}
 </style>
@@ -261,6 +278,7 @@ textarea{resize:vertical;min-height:64px}
     <div class="tsp"></div>
     <div id="tb-act"></div>
   </div>
+  <div id="screen-login" class="hidden"></div>
   <div id="screen-onboarding" class="hidden"></div>
   <div id="screen-home" class="hidden"></div>
   <div id="screen-board" class="hidden">
@@ -276,6 +294,12 @@ textarea{resize:vertical;min-height:64px}
 <input type="file" id="imp-file" accept=".json" style="display:none">
 
 <script>
+/* ── CONFIG API / AUTH ── */
+const SUPABASE_URL  = 'https://azklaodfcesmhaidvmwm.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6a2xhb2RmY2VzbWhhaWR2bXdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODQzNDMsImV4cCI6MjA5MzI2MDM0M30.zl2OY2GIe8JeFF3VIdLpDJDB45uc5kVhgi3h4qMBi3w';
+const API_URL       = 'https://tablero-api.onrender.com';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
 /* ── CONSTANTES ── */
 const COLORS={
   violet: {accent:'#7C3AED',bg:'#EDE9FE',text:'#5B21B6',tb:'#EDE9FE',tt:'#6D28D9'},
@@ -359,15 +383,156 @@ const S={
   screen:'loading',
   user:{name:'Usuario',avatarColor:'#4440B8',role:'personal'},
   boards:[],posts:{},boardId:null,layout:'wall',
+  token:null,  // JWT de Supabase, null = modo local
 };
 
-/* ── PERSISTENCIA ── */
-function guardar(){
+/* ── AUTH ── */
+async function loginGoogle(){
+  const {error}=await sb.auth.signInWithOAuth({
+    provider:'google',
+    options:{redirectTo:window.location.href}
+  });
+  if(error)toast('⚠ Error al conectar con Google');
+}
+async function logout(){
+  await sb.auth.signOut();
+  S.token=null;S.boards=[];S.posts={};
+  show('login');renderLogin();
+  toast('Sesión cerrada');
+}
+
+/* ── HELPERS API ── */
+function apiHeaders(){return{
+  'Content-Type':'application/json',
+  'Authorization':`Bearer ${S.token}`
+};}
+
+/* ── CARGA DESDE API ── */
+async function cargarAPI(){
+  try{
+    const res=await fetch(`${API_URL}/api/boards`,{headers:apiHeaders()});
+    if(!res.ok)throw new Error(res.status);
+    const apiBoards=await res.json();
+    // Normalizar campos nuevos que puede que aún no retorne la API desplegada
+    S.boards=apiBoards.map((b,i)=>({...b,version:b.version||1,orderIndex:b.orderIndex??i,role:b.role||'owner'}));
+    // Cargar posts de todos los boards en paralelo
+    const pairs=await Promise.all(S.boards.map(async b=>{
+      const r=await fetch(`${API_URL}/api/boards/${b.id}/posts`,{headers:apiHeaders()});
+      const posts=r.ok?await r.json():[];
+      // Normalizar tags
+      return[b.id,posts.map(p=>({...p,tags:Array.isArray(p.tags)?p.tags:(p.tag?[p.tag]:[]),src2:p.src2||''}))];
+    }));
+    S.posts=Object.fromEntries(pairs);
+    guardarLocal();  // cachear localmente
+  }catch(e){
+    console.warn('API no disponible, cargando local:',e);
+    cargarLocal();
+  }
+}
+
+/* ── CRUD API ── */
+async function apiBoardSave(board,isEdit){
+  if(!S.token)return board;
+  try{
+    const url=isEdit?`${API_URL}/api/boards/${board.id}`:`${API_URL}/api/boards`;
+    const res=await fetch(url,{method:isEdit?'PUT':'POST',headers:apiHeaders(),body:JSON.stringify(board)});
+    if(res.ok)return await res.json();
+  }catch(e){console.warn('Error API board save:',e);}
+  return board;
+}
+async function apiBoardDelete(id){
+  if(!S.token)return;
+  try{await fetch(`${API_URL}/api/boards/${id}`,{method:'DELETE',headers:apiHeaders()});}
+  catch(e){console.warn('Error API board delete:',e);}
+}
+async function apiPostSave(post,isEdit){
+  if(!S.token)return post;
+  try{
+    const url=isEdit?`${API_URL}/api/boards/${post.bid}/posts/${post.id}`:`${API_URL}/api/boards/${post.bid}/posts`;
+    const res=await fetch(url,{method:isEdit?'PUT':'POST',headers:apiHeaders(),body:JSON.stringify(post)});
+    if(res.ok)return await res.json();
+  }catch(e){console.warn('Error API post save:',e);}
+  return post;
+}
+async function apiPostDelete(boardId,postId){
+  if(!S.token)return;
+  try{await fetch(`${API_URL}/api/boards/${boardId}/posts/${postId}`,{method:'DELETE',headers:apiHeaders()});}
+  catch(e){console.warn('Error API post delete:',e);}
+}
+
+/* ── MIGRACIÓN LOCAL → API (primera vez) ── */
+async function migrarLocalAAPI(){
+  const localBoards=JSON.parse(localStorage.getItem('tb_boards')||'[]');
+  if(!localBoards.length)return;
+  const ov=document.createElement('div');
+  ov.className='confirm-overlay';ov.id='migrate-confirm';
+  ov.innerHTML=`<div class="confirm-box">
+    <div class="confirm-icon">☁️</div>
+    <div class="confirm-title">Datos locales encontrados</div>
+    <div class="confirm-desc">Tienes <strong>${localBoards.length} tablero(s)</strong> guardados localmente. ¿Subirlos a tu cuenta en la nube?</div>
+    <div class="confirm-actions">
+      <button class="btn" onclick="document.getElementById('migrate-confirm').remove()">No, ignorar</button>
+      <button class="btn btn-p" onclick="document.getElementById('migrate-confirm').remove();ejecutarMigracion()">Subir a mi cuenta</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+async function ejecutarMigracion(){
+  const localBoards=JSON.parse(localStorage.getItem('tb_boards')||'[]');
+  const localPosts=JSON.parse(localStorage.getItem('tb_posts')||'{}');
+  let count=0;
+  for(const b of localBoards){
+    try{
+      const res=await fetch(`${API_URL}/api/boards`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(b)});
+      if(res.ok){
+        const created=await res.json();
+        const posts=(localPosts[b.id]||[]);
+        for(const p of posts){
+          await fetch(`${API_URL}/api/boards/${created.id}/posts`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(p)});
+        }
+        count++;
+      }
+    }catch(e){console.warn(e);}
+  }
+  localStorage.removeItem('tb_boards');
+  localStorage.removeItem('tb_posts');
+  await cargarAPI();
+  renderHome();
+  toast(`✓ ${count} tablero(s) migrado(s) a tu cuenta`);
+}
+
+/* ── ARRANQUE CON AUTH ── */
+async function iniciarConSesion(session){
+  S.token=session.access_token;
+  const u=session.user;
+  S.user={name:u.user_metadata?.full_name||u.email,avatarColor:'#4440B8',role:'personal'};
+  await cargarAPI();
+  // Si API no tiene boards pero hay datos locales, ofrecer migración
+  if(S.boards.length===0&&localStorage.getItem('tb_boards')){
+    await migrarLocalAAPI();
+  } else if(S.boards.length===0){
+    sembrar();
+  }
+  if(!localStorage.getItem('tb_onboarded')){show('onboarding');renderOB();}
+  else{show('home');renderHome();}
+}
+function iniciarLocal(){
+  S.token=null;
+  cargarLocal();
+  if(!S.boards.length)sembrar();
+  localStorage.setItem('tb_onboarded','1');
+  show('home');renderHome();
+}
+
+/* ── PERSISTENCIA LOCAL ── */
+function guardar(){guardarLocal();}  // alias mantenido para compatibilidad
+function guardarLocal(){
   localStorage.setItem('tb_boards',JSON.stringify(S.boards));
   localStorage.setItem('tb_posts', JSON.stringify(S.posts));
   localStorage.setItem('tb_user',  JSON.stringify(S.user));
 }
-function cargar(){
+function cargar(){cargarLocal();}   // alias mantenido para compatibilidad
+function cargarLocal(){
   try{
     const b=localStorage.getItem('tb_boards'),
           p=localStorage.getItem('tb_posts'),
@@ -375,22 +540,33 @@ function cargar(){
     if(b)S.boards=JSON.parse(b);
     if(p)S.posts=JSON.parse(p);
     if(u)S.user=JSON.parse(u);
+    // Migración: tag (string) → tags (array)
+    Object.values(S.posts).forEach(arr=>arr.forEach(p=>{
+      if(!Array.isArray(p.tags)) p.tags = p.tag ? [p.tag] : [];
+      if(!p.src2) p.src2='';
+    }));
+    // Migración: boards sin version/orderIndex
+    S.boards.forEach((b,i)=>{
+      if(!b.version) b.version=1;
+      if(b.orderIndex==null) b.orderIndex=i;
+      if(!b.role) b.role='owner';
+    });
   }catch(e){console.warn(e)}
 }
 function sembrar(){
   S.boards=[
-    {id:'b1',title:'Campaña Q2',      icon:'📣',color:'#EDE9FE',privacy:'team',   ca:n(),ua:n()},
-    {id:'b2',title:'Investigación UX',icon:'🔍',color:'#D1FAE5',privacy:'private',ca:n(),ua:n()},
-    {id:'b3',title:'Roadmap 2026',    icon:'🗺',color:'#FEF3C7',privacy:'team',   ca:n(),ua:n()},
-    {id:'b4',title:'Brainstorm app',  icon:'💡',color:'#FFE4E6',privacy:'public', ca:n(),ua:n()},
+    {id:'b1',title:'Campaña Q2',      icon:'📣',color:'#EDE9FE',privacy:'team',   ca:n(),ua:n(),version:1,orderIndex:0,role:'owner'},
+    {id:'b2',title:'Investigación UX',icon:'🔍',color:'#D1FAE5',privacy:'private',ca:n(),ua:n(),version:1,orderIndex:1,role:'owner'},
+    {id:'b3',title:'Roadmap 2026',    icon:'🗺',color:'#FEF3C7',privacy:'team',   ca:n(),ua:n(),version:1,orderIndex:2,role:'owner'},
+    {id:'b4',title:'Brainstorm app',  icon:'💡',color:'#FFE4E6',privacy:'public', ca:n(),ua:n(),version:1,orderIndex:3,role:'owner'},
   ];
   S.posts={
     b1:[
-      {id:'p1',bid:'b1',title:'Onboarding simplificado',  content:'Reducir pasos de registro a 3 máximo.',       tag:'UX',     color:'violet',kc:'in-progress',image:'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&q=80',src:'https://www.nngroup.com',ca:n()},
-      {id:'p2',bid:'b1',title:'Boards ilimitados gratis', content:'Ventaja competitiva frente a Padlet.',         tag:'Negocio',color:'teal',  kc:'done',       image:'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80',src:'https://wakelet.com',    ca:n()},
-      {id:'p3',bid:'b1',title:'IA para organizar tarjetas',content:'Agrupar posts similares automáticamente.',   tag:'IA',     color:'amber', kc:'todo',       image:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&q=80',src:'https://anthropic.com',  ca:n()},
-      {id:'p4',bid:'b1',title:'App móvil nativa',         content:'React Native compartiendo lógica con web.',   tag:'Producto',color:'coral',kc:'todo',       image:'https://images.unsplash.com/photo-1512941937938-a272e9beab67?w=400&q=80',src:'https://reactnative.dev',ca:n()},
-      {id:'p5',bid:'b1',title:'Modo offline',             content:'PWA con sincronización al reconectar.',       tag:'Técnico',color:'pink',  kc:'review',     image:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&q=80',src:'https://web.dev',        ca:n()},
+      {id:'p1',bid:'b1',title:'Onboarding simplificado',  content:'Reducir pasos de registro a 3 máximo.',       tags:['UX','Diseño'],     tag:'UX',     color:'violet',kc:'in-progress',image:'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&q=80',src:'https://www.nngroup.com',src2:'',ca:n()},
+      {id:'p2',bid:'b1',title:'Boards ilimitados gratis', content:'Ventaja competitiva frente a Padlet.',         tags:['Negocio'],         tag:'Negocio',color:'teal',  kc:'done',       image:'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=400&q=80',src:'https://wakelet.com',    src2:'',ca:n()},
+      {id:'p3',bid:'b1',title:'IA para organizar tarjetas',content:'Agrupar posts similares automáticamente.',   tags:['IA','Producto'],   tag:'IA',     color:'amber', kc:'todo',       image:'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=400&q=80',src:'https://anthropic.com',  src2:'https://docs.anthropic.com',ca:n()},
+      {id:'p4',bid:'b1',title:'App móvil nativa',         content:'React Native compartiendo lógica con web.',   tags:['Producto','Móvil'],tag:'Producto',color:'coral',kc:'todo',       image:'https://images.unsplash.com/photo-1512941937938-a272e9beab67?w=400&q=80',src:'https://reactnative.dev',src2:'',ca:n()},
+      {id:'p5',bid:'b1',title:'Modo offline',             content:'PWA con sincronización al reconectar.',       tags:['Técnico'],         tag:'Técnico',color:'pink',  kc:'review',     image:'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&q=80',src:'https://web.dev',        src2:'https://developer.mozilla.org',ca:n()},
     ],
     b2:[],b3:[],b4:[],
   };
@@ -400,34 +576,87 @@ const n=()=>new Date().toISOString();
 
 /* ── ROUTER ── */
 function show(screen){
-  ['onboarding','home','board'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
+  ['login','onboarding','home','board'].forEach(s=>document.getElementById('screen-'+s).classList.add('hidden'));
   document.getElementById('screen-'+screen).classList.remove('hidden');
   S.screen=screen;
   renderTB();
+}
+function renderLogin(){
+  document.getElementById('screen-login').innerHTML=`
+    <div class="login-card">
+      <div class="login-logo">ta<span style="font-style:italic">bl</span>ero</div>
+      <div class="login-sub">Tu espacio de tableros colaborativos.<br>Gratis, siempre.</div>
+      <button class="btn-google" onclick="loginGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/><path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+        Continuar con Google
+      </button>
+      <div class="login-divider">o</div>
+      <button class="btn" style="width:100%;justify-content:center" onclick="iniciarLocal()">
+        Usar sin cuenta (modo local)
+      </button>
+      <p style="font-size:11px;color:var(--muted);margin-top:20px;line-height:1.5">En modo local los datos se guardan solo en este dispositivo.</p>
+    </div>`;
 }
 
 /* ── TOPBAR ── */
 function renderTB(){
   const el=document.getElementById('tb-act');
   const ini=initials(S.user.name);
-  const av=`<div class="av-chip" style="background:${S.user.avatarColor}">${ini}</div>`;
-  const eiBtn=`<button class="btn-g" onclick="openEI()" style="display:flex;align-items:center;gap:5px;font-size:13px">${svgExp()} Exportar / Importar</button>`;
+  const logoutBtn=S.token?`<button class="btn-g" onclick="logout()" title="Cerrar sesión" style="font-size:12px">Salir</button>`:'';
+  const av=`<div class="av-chip" style="background:${S.user.avatarColor};cursor:${S.token?'pointer':'default'}" title="${S.token?'Cerrar sesión':''}" onclick="${S.token?'logout()':''}">${ini}</div>`;
+  const eiAllBtn=`<button class="btn-g" onclick="openEI()" style="display:flex;align-items:center;gap:5px">${svgExp()} Exportar</button>`;
   if(S.screen==='board'){
+    const eiBoardBtn=`<button class="btn-g" onclick="openEI('${S.boardId}')" style="display:flex;align-items:center;gap:5px">${svgExp()} Este tablero</button>`;
     el.innerHTML=`<button class="btn-g" onclick="goHome()">← Mis tableros</button>
-      ${eiBtn}
-      <button class="btn btn-p" onclick="openNewPost()" style="padding:7px 14px;font-size:13px">+ Post</button>${av}`;
+      ${eiBoardBtn}
+      <button class="btn-g" onclick="sortPostsAZ()" title="Ordenar A→Z">A→Z</button>
+      <button class="btn btn-p" onclick="openNewPost()" style="padding:7px 14px">+ Post</button>
+      ${logoutBtn}${av}`;
   }else if(S.screen==='home'){
-    el.innerHTML=`${eiBtn}
-      <button class="btn btn-p" onclick="openNewBoard()" style="padding:7px 14px;font-size:13px">+ Nuevo tablero</button>${av}`;
+    el.innerHTML=`${eiAllBtn}
+      <button class="btn-g" onclick="sortBoardsAZ()" title="Ordenar A→Z">A→Z</button>
+      <button class="btn btn-p" onclick="openNewBoard()" style="padding:7px 14px">+ Nuevo tablero</button>
+      ${logoutBtn}${av}`;
   }else{el.innerHTML='';}
 }
 
 /* ── HOME ── */
 function goHome(){S.boardId=null;show('home');renderHome();}
+function boardCard(b){
+  const posts=(S.posts[b.id]||[]);
+  const pc=PC[b.privacy]||'#F3F4F6';
+  const pt=PT[b.privacy]||'#374151';
+  const tmpl=TEMPLATES.find(t=>t.id===b.tmpl);
+  const desc=b.description||(tmpl?tmpl.desc:'')||'';
+  const roleBadge=b.role&&b.role!=='owner'?`<span style="font-size:10px;padding:2px 6px;border-radius:20px;background:#FEF3C7;color:#92400E;font-weight:500">${b.role==='editor'?'Editor':'Solo lectura'}</span>`:'';
+  return`<div class="bc" onclick="goBoard('${b.id}')">
+    <button class="bc-menu-btn" onclick="event.stopPropagation();openCtxMenu(event,'${b.id}')" title="Opciones">⋯</button>
+    <div class="bc-cov" style="background:${b.color}">
+      <div class="bc-cov-dots"></div>
+      <span class="bc-cov-icon">${b.icon}</span>
+    </div>
+    <div class="bc-bod">
+      <div class="bc-ttl">${esc(b.title)}</div>
+      ${desc?`<div class="bc-desc">${esc(desc)}</div>`:'<div class="bc-desc" style="color:var(--border)">Sin descripción</div>'}
+      <div class="bc-ft">
+        <div class="bc-meta"><span>📝</span><span>${posts.length} post${posts.length!==1?'s':''}</span></div>
+        <div style="display:flex;gap:5px;align-items:center">
+          ${roleBadge}
+          <span class="bc-priv" style="background:${pc};color:${pt}">${PL[b.privacy]||'Equipo'}</span>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+function sortBoardsAZ(){
+  S.boards=[...S.boards].sort((a,b)=>a.title.localeCompare(b.title,'es'));
+  renderHome();
+  toast('Tableros ordenados A→Z');
+}
 function renderHome(){
+  const owned=S.boards.filter(b=>!b.role||b.role==='owner');
+  const collab=S.boards.filter(b=>b.role&&b.role!=='owner');
   const total=S.boards.length;
-  const privColor={public:'#DCFCE7',team:'#DBEAFE',private:'#F3F4F6'};
-  const privText ={public:'#166534',team:'#1e40af',private:'#374151'};
   document.getElementById('screen-home').innerHTML=`
     <div class="home-header">
       <div class="home-hgroup">
@@ -436,38 +665,32 @@ function renderHome(){
       </div>
       <div class="home-count">${total} tablero${total!==1?'s':''}</div>
     </div>
-    <div class="bg">
-      ${S.boards.map(b=>{
-        const posts=(S.posts[b.id]||[]);
-        const pc=privColor[b.privacy]||'#F3F4F6';
-        const pt=privText[b.privacy]||'#374151';
-        const tmpl=TEMPLATES.find(t=>t.id===b.tmpl);
-        const desc=b.description||(tmpl?tmpl.desc:'')||'';
-        return`<div class="bc" onclick="goBoard('${b.id}')">
-          <button class="bc-menu-btn" onclick="event.stopPropagation();openCtxMenu(event,'${b.id}')" title="Opciones">⋯</button>
-          <div class="bc-cov" style="background:${b.color}">
-            <div class="bc-cov-dots"></div>
-            <span class="bc-cov-icon">${b.icon}</span>
-          </div>
-          <div class="bc-bod">
-            <div class="bc-ttl">${esc(b.title)}</div>
-            ${desc?`<div class="bc-desc">${esc(desc)}</div>`:'<div class="bc-desc" style="color:var(--border)">Sin descripción</div>'}
-            <div class="bc-ft">
-              <div class="bc-meta">
-                <span>📝</span>
-                <span>${posts.length} post${posts.length!==1?'s':''}</span>
-              </div>
-              <span class="bc-priv" style="background:${pc};color:${pt}">${PL[b.privacy]||'Equipo'}</span>
-            </div>
-          </div>
-        </div>`;
-      }).join('')}
-      <div class="bc-new" onclick="openNewBoard()">
-        <div class="pr">+</div>
-        <span style="font-weight:500">Nuevo tablero</span>
-        <span style="font-size:11px;opacity:.7">Elige una plantilla</span>
+    <div class="home-sec">
+      <div class="home-sec-hd">
+        <span class="home-sec-ttl">Creados por mí</span>
       </div>
-    </div>`;
+      <div class="bg">
+        ${owned.map(boardCard).join('')}
+        <div class="bc-new" onclick="openNewBoard()">
+          <div class="pr">+</div>
+          <span style="font-weight:500">Nuevo tablero</span>
+          <span style="font-size:11px;opacity:.7">Elige una plantilla</span>
+        </div>
+      </div>
+    </div>
+    ${collab.length?`
+    <div class="home-sec">
+      <div class="home-sec-hd">
+        <span class="home-sec-ttl">En colaboración</span>
+      </div>
+      <div class="bg">${collab.map(boardCard).join('')}</div>
+    </div>`:`
+    <div class="home-sec">
+      <div class="home-sec-hd"><span class="home-sec-ttl">En colaboración</span></div>
+      <div style="padding:20px;border:1px dashed var(--border);border-radius:var(--rl);color:var(--muted);font-size:13px;text-align:center">
+        Los tableros compartidos contigo aparecerán aquí cuando conectes tu cuenta.
+      </div>
+    </div>`}`;
 }
 
 /* ── BOARD ── */
@@ -525,14 +748,16 @@ function renderLayout(){
 
 /* ── WALL ── */
 function renderWall(posts){
-  if(!posts.length)return`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:8px"><div style="font-size:36px;opacity:.3">📋</div><div style="font-size:14px;font-weight:500;color:var(--muted)">Aún no hay posts</div><div style="font-size:12px;color:var(--muted)">Haz clic en "+ Post" para agregar el primero</div></div>`;
+  if(!posts.length)return`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:8px"><div style="font-size:36px;opacity:.3">📋</div><div style="font-size:14px;font-weight:500;color:var(--muted)">Aún no hay posts</div><div style="font-size:13px;color:var(--muted)">Haz clic en "+ Post" para agregar el primero</div></div>`;
   return`<div class="wall-grid">${posts.map(wallCard).join('')}</div>`;
 }
 function wallCard(p){
   const c=COLORS[p.color]||COLORS.gray;
   const img=p.image&&p.image.trim();
   const src=p.src&&p.src.trim();
-  return`<div class="pc">
+  const src2=(p.src2||'').trim();
+  const tags=Array.isArray(p.tags)?p.tags:(p.tag?[p.tag]:[]);
+  return`<div class="pc" style="border-color:${c.accent}">
     ${img?`<div class="pc-imgw" onclick="openEditPost('${p.id}')"><img src="${esc(img)}" class="pc-img" alt="${esc(p.title)}" onerror="this.parentElement.style.display='none'"></div>`
          :`<div class="pc-acc" style="background:${c.accent};cursor:pointer" onclick="openEditPost('${p.id}')"></div>`}
     <div class="pc-bod" onclick="openEditPost('${p.id}')">
@@ -540,8 +765,11 @@ function wallCard(p){
       ${p.content?`<div class="pc-txt">${esc(p.content)}</div>`:''}
     </div>
     <div class="pc-ft">
-      ${p.tag?`<span class="pc-tag" style="background:${c.tb};color:${c.tt}">${esc(p.tag)}</span>`:'<span></span>'}
-      ${src?`<a href="${esc(src)}" target="_blank" rel="noopener" class="pc-src" onclick="event.stopPropagation()">${svgLnk()} Fuente</a>`:''}
+      <div class="pc-tags">${tags.map(t=>`<span class="pc-tag" style="background:${c.tb};color:${c.tt}">${esc(t)}</span>`).join('')}</div>
+      <div class="pc-links">
+        ${src?`<a href="${esc(src)}" target="_blank" rel="noopener" class="pc-src" onclick="event.stopPropagation()">${svgLnk()} Fuente</a>`:''}
+        ${src2?`<a href="${esc(src2)}" target="_blank" rel="noopener" class="pc-src" onclick="event.stopPropagation()">${svgLnk()} Docs</a>`:''}
+      </div>
     </div>
   </div>`;
 }
@@ -557,14 +785,19 @@ function renderKanban(posts){
         const c=COLORS[p.color]||COLORS.gray;
         const img=p.image&&p.image.trim();
         const src=p.src&&p.src.trim();
-        return`<div class="kcard" onclick="openEditPost('${p.id}')">
+        const src2=(p.src2||'').trim();
+        const tags=Array.isArray(p.tags)?p.tags:(p.tag?[p.tag]:[]);
+        return`<div class="kcard" style="border-color:${c.accent}" onclick="openEditPost('${p.id}')">
           ${img?`<img src="${esc(img)}" style="width:100%;height:60px;object-fit:cover;border-radius:6px;margin-bottom:8px;display:block" onerror="this.style.display='none'">`
                :`<div class="kc-acc" style="background:${c.accent}"></div>`}
           <div class="kc-ttl">${esc(p.title)}</div>
-          ${p.content?`<div style="font-size:11px;color:var(--muted);margin-top:3px;line-height:1.4">${esc(p.content)}</div>`:''}
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px">
-            ${p.tag?`<span class="pc-tag" style="background:${c.tb};color:${c.tt}">${esc(p.tag)}</span>`:'<span></span>'}
-            ${src?`<a href="${esc(src)}" target="_blank" rel="noopener" class="pc-src" onclick="event.stopPropagation()">${svgLnk()} Fuente</a>`:''}
+          ${p.content?`<div style="font-size:12px;color:var(--muted);margin-top:3px;line-height:1.4">${esc(p.content)}</div>`:''}
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-top:6px;gap:4px;flex-wrap:wrap">
+            <div style="display:flex;flex-wrap:wrap;gap:3px">${tags.map(t=>`<span class="pc-tag" style="background:${c.tb};color:${c.tt}">${esc(t)}</span>`).join('')}</div>
+            <div style="display:flex;gap:3px;flex-shrink:0">
+              ${src?`<a href="${esc(src)}" target="_blank" rel="noopener" class="pc-src" onclick="event.stopPropagation()">${svgLnk()} Fuente</a>`:''}
+              ${src2?`<a href="${esc(src2)}" target="_blank" rel="noopener" class="pc-src" onclick="event.stopPropagation()">${svgLnk()} Docs</a>`:''}
+            </div>
           </div>
         </div>`;
       }).join('')}
@@ -604,7 +837,7 @@ function renderTL(){
       <div class="tl-lbl" style="font-size:12px;color:var(--text);font-weight:500;padding-right:12px;width:140px;flex-shrink:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(p.title)}">${esc(p.title)}</div>
       <div class="tl-ba">
         <div class="tl-bar" style="left:${left}%;width:${barW}%;background:${c.bg};color:${c.text};border:1px solid ${c.accent}20">
-          ${esc(p.tag||cols[pos]?.l||'')}
+          ${esc((Array.isArray(p.tags)&&p.tags[0])||p.tag||cols[pos]?.l||'')}
         </div>
       </div>
     </div>`;
@@ -679,23 +912,33 @@ function saveBoard(e){
   if(!title){document.getElementById('mb-t').focus();return;}
   if(e){
     const i=S.boards.findIndex(b=>b.id===_B.id);
-    const desc2=document.getElementById('mb-d');S.boards[i]={...S.boards[i],..._B,title,description:desc2?desc2.value.trim():(_B.description||''),ua:n()};
+    const desc2=document.getElementById('mb-d');
+    S.boards[i]={...S.boards[i],..._B,title,description:desc2?desc2.value.trim():(_B.description||''),ua:n(),version:(S.boards[i].version||1)+1};
   }else{
     const id='b'+Date.now();
     const tmplDef=TEMPLATES.find(t=>t.id===_B.tmpl);
-    S.boards.push({id,title,icon:_B.icon,color:_B.color,privacy:_B.privacy,description:_B.description||'',tmpl:_B.tmpl||'',ca:n(),ua:n()});
+    S.boards.push({id,title,icon:_B.icon,color:_B.color,privacy:_B.privacy,description:_B.description||'',tmpl:_B.tmpl||'',ca:n(),ua:n(),version:1,orderIndex:S.boards.length,role:'owner'});
     // Sembrar posts de la plantilla seleccionada
-    S.posts[id]=(tmplDef&&tmplDef.posts||[]).map((p,i)=>({
-      id:'p'+Date.now()+i,bid:id,
-      title:p.title,content:p.content,tag:p.tag,
-      color:p.color,kc:p.kc,image:'',src:'',ca:n(),
+    S.posts[id]=(tmplDef&&tmplDef.posts||[]).map((p,idx)=>({
+      id:'p'+Date.now()+idx,bid:id,
+      title:p.title,content:p.content,tags:p.tag?[p.tag]:[],tag:p.tag||'',
+      color:p.color,kc:p.kc,image:'',src:'',src2:'',ca:n(),
     }));
-    // Aplicar layout por defecto de la plantilla
     if(tmplDef)S.boards[S.boards.length-1].defaultLayout=tmplDef.layout;
   }
   guardar();closeModal();
   if(S.screen==='home')renderHome();else renderBoard();
+  // Sync en background: si es edición buscamos el board por id, si es nuevo es el último
+  apiBoardSave(!!_B.id?S.boards.find(b=>b.id===_B.id):S.boards[S.boards.length-1],!!_B.id);
 }
+function sortPostsAZ(){
+  const bid=S.boardId;
+  if(!S.posts[bid])return;
+  S.posts[bid]=[...S.posts[bid]].sort((a,b)=>a.title.localeCompare(b.title,'es'));
+  renderLayout();
+  toast('Posts ordenados A→Z');
+}
+
 /* ── MENÚ CONTEXTUAL ── */
 function openCtxMenu(e,id){
   e.stopPropagation();
@@ -774,28 +1017,45 @@ function deleteBoard(id){
   guardar();
   document.getElementById('modal-root').innerHTML='';
   if(S.boardId===id) S.boardId=null;
-  // FIX: show primero, luego render
   show('home');
   renderHome();
   toast('🗑 Tablero "'+nombre+'" eliminado');
+  apiBoardDelete(id);  // sync en background
 }
 
 /* ── MODAL POST ── */
 let _P={};
 function openNewPost(){
   const cols=getKcols(S.boardId);
-  _P={color:'violet',kc:cols[0].id,tag:'',title:'',content:'',image:'',src:''};
+  _P={color:'violet',kc:cols[0].id,tags:[],title:'',content:'',image:'',src:'',src2:''};
   renderMP(false);
 }
 function openEditPost(id){
   const p=(S.posts[S.boardId]||[]).find(x=>x.id===id);
-  if(!p)return;_P={...p};renderMP(true);
+  if(!p)return;
+  // Migración: tag string → tags array al abrir post antiguo
+  _P={...p,tags:Array.isArray(p.tags)?p.tags:(p.tag?[p.tag]:[]),src2:p.src2||''};
+  renderMP(true);
 }
 function syncP(){
-  [['mp-t','title'],['mp-c','content'],['mp-tag','tag'],['mp-img','image'],['mp-src','src']].forEach(([fid,k])=>{
+  [['mp-t','title'],['mp-c','content'],['mp-img','image'],['mp-src','src'],['mp-src2','src2']].forEach(([fid,k])=>{
     const el=document.getElementById(fid);if(el)_P[k]=el.value;
   });
+  // Sync tags desde los inputs dinámicos
+  const tagInputs=document.querySelectorAll('.mp-tag-input');
+  if(tagInputs.length)_P.tags=[...tagInputs].map(el=>el.value.trim()).filter(Boolean);
 }
+function renderTagInputs(){
+  const tags=_P.tags||[];
+  return tags.map((t,i)=>`
+    <div style="display:flex;gap:6px;margin-bottom:6px">
+      <input type="text" class="mp-tag-input" placeholder="Etiqueta ${i+1}…" value="${esc(t)}" style="flex:1">
+      <button type="button" onclick="removeTag(${i})" style="padding:0 10px;border:1px solid var(--border);background:var(--bg);border-radius:var(--r);cursor:pointer;color:var(--muted);font-size:14px" title="Quitar">✕</button>
+    </div>`).join('')+
+    (tags.length<5?`<button type="button" onclick="addTag()" class="btn-g" style="font-size:13px;padding:4px 8px">+ Añadir etiqueta</button>`:'');
+}
+function addTag(){syncP();if(_P.tags.length<5){_P.tags.push('');renderMP(!!_P.id);};}
+function removeTag(i){syncP();_P.tags.splice(i,1);renderMP(!!_P.id);}
 function renderMP(e){
   const img=_P.image&&_P.image.trim();
   document.getElementById('modal-root').innerHTML=`
@@ -807,8 +1067,9 @@ function renderMP(e){
         <div class="ff"><label class="fl">URL de imagen</label>
           <input type="text" id="mp-img" placeholder="https://ejemplo.com/imagen.jpg" value="${esc(_P.image||'')}">
           ${img?`<img src="${esc(img)}" class="imgp" onerror="this.style.display='none'">`:''}</div>
-        <div class="ff"><label class="fl">Enlace a la fuente</label><input type="text" id="mp-src" placeholder="https://fuente.com/articulo" value="${esc(_P.src||'')}"></div>
-        <div class="ff"><label class="fl">Etiqueta</label><input type="text" id="mp-tag" placeholder="Ej: UX, IA, Técnico..." value="${esc(_P.tag||'')}"></div>
+        <div class="ff"><label class="fl">Enlace a la fuente</label><input type="text" id="mp-src" placeholder="https://fuente.com/artículo" value="${esc(_P.src||'')}"></div>
+        <div class="ff"><label class="fl">Documentación / Libreta (opcional)</label><input type="text" id="mp-src2" placeholder="https://docs.ejemplo.com" value="${esc(_P.src2||'')}"></div>
+        <div class="ff"><label class="fl">Etiquetas (hasta 5)</label>${renderTagInputs()}</div>
         <div class="ff"><label class="fl">Color de acento</label><div class="cp">
           ${Object.entries(COLORS).map(([k,c])=>`<div class="cs${_P.color===k?' sel':''}" style="background:${c.accent}" onclick="selP('color','${k}')"></div>`).join('')}
         </div></div>
@@ -833,25 +1094,32 @@ function savePost(e){
   const post={
     id:e?_P.id:'p'+Date.now(),bid,
     title:_P.title.trim(),content:(_P.content||'').trim(),
-    tag:(_P.tag||'').trim(),image:(_P.image||'').trim(),src:(_P.src||'').trim(),
+    tags:(_P.tags||[]).filter(Boolean),
+    tag:(_P.tags||[])[0]||'',  // compatibilidad con API actual
+    image:(_P.image||'').trim(),src:(_P.src||'').trim(),src2:(_P.src2||'').trim(),
     color:_P.color,kc:_P.kc,ca:e?_P.ca:n(),
   };
   if(e){const i=S.posts[bid].findIndex(p=>p.id===_P.id);if(i>=0)S.posts[bid][i]=post;}
   else S.posts[bid].push(post);
   const bi=S.boards.findIndex(b=>b.id===bid);if(bi>=0)S.boards[bi].ua=n();
   guardar();closeModal();renderLayout();
+  apiPostSave(post,!!e);  // sync en background
 }
 function deletePost(id){
   S.posts[S.boardId]=(S.posts[S.boardId]||[]).filter(p=>p.id!==id);
   guardar();closeModal();renderLayout();
+  apiPostDelete(S.boardId,id);  // sync en background
 }
 
 /* ── MODAL EI ── */
-let _impData=null,_impMode='merge';
-function openEI(){_impData=null;_impMode='merge';renderEI('export');}
+let _impData=null,_impMode='merge',_eiScope='all';
+function openEI(boardId){_impData=null;_impMode='merge';_eiScope=boardId||'all';renderEI('export');}
 function renderEI(tab){
-  const tB=S.boards.length,tP=Object.values(S.posts).reduce((a,b)=>a+b.length,0);
-  const exp={version:'1.0',exportedAt:n(),user:S.user,boards:S.boards,posts:S.posts};
+  const isBoard=_eiScope&&_eiScope!=='all';
+  const expBoards=isBoard?S.boards.filter(b=>b.id===_eiScope):S.boards;
+  const expPosts=isBoard?{[_eiScope]:S.posts[_eiScope]||[]}:S.posts;
+  const tB=expBoards.length,tP=Object.values(expPosts).reduce((a,b)=>a+b.length,0);
+  const exp={version:'1.1',exportedAt:n(),user:S.user,boards:expBoards,posts:expPosts};
   const prev=JSON.stringify(exp,null,2).slice(0,500)+'\n…';
   const has=!!_impData;
   const iB=_impData?(_impData.boards||[]).length:0;
@@ -859,7 +1127,7 @@ function renderEI(tab){
   document.getElementById('modal-root').innerHTML=`
     <div class="mbk" onclick="closeModal(event)">
       <div class="mdl" style="max-width:440px" onclick="event.stopPropagation()">
-        <div class="mdl-ttl">Exportar / Importar</div>
+        <div class="mdl-ttl">${_eiScope!=='all'?'Exportar tablero':'Exportar / Importar'}</div>
         <div class="ei-tabs">
           <button class="ei-tab${tab==='export'?' active':''}" onclick="renderEI('export')">⬇ Exportar</button>
           <button class="ei-tab${tab==='import'?' active':''}" onclick="renderEI('import')">⬆ Importar</button>
@@ -915,19 +1183,24 @@ function renderEI(tab){
   }
 }
 function doExport(){
-  const exp={version:'1.0',exportedAt:n(),user:S.user,boards:S.boards,posts:S.posts};
+  const isBoard=_eiScope&&_eiScope!=='all';
+  const expBoards=isBoard?S.boards.filter(b=>b.id===_eiScope):S.boards;
+  const expPosts=isBoard?{[_eiScope]:S.posts[_eiScope]||[]}:S.posts;
+  const exp={version:'1.1',exportedAt:n(),user:S.user,boards:expBoards,posts:expPosts};
   const json=JSON.stringify(exp,null,2);
   const blob=new Blob([json],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
   a.href=url;
-  a.download='tablero-backup-'+n().slice(0,10)+'.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const fname=isBoard
+    ?(expBoards[0]?.title||'tablero').replace(/[^a-z0-9]/gi,'-').toLowerCase()
+    :'tablero-backup';
+  a.download=fname+'-'+n().slice(0,10)+'.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(url),2000);
   closeModal();
-  toast('✓ Backup descargado — '+S.boards.length+' tablero(s), '+Object.values(S.posts).reduce((a,b)=>a+b.length,0)+' post(s)');
+  const tP=Object.values(expPosts).reduce((a,b)=>a+b.length,0);
+  toast('✓ Descargado — '+expBoards.length+' tablero(s), '+tP+' post(s)');
 }
 function readFile(file){
   if(!file)return;
@@ -960,19 +1233,55 @@ function handleDrop(e){
 }
 function doImport(){
   if(!_impData)return;
+  const importedBoards=_impData.boards||[];
+  const importedPosts=_impData.posts||{};
+
   if(_impMode==='replace'){
-    if(!confirm('⚠️ Esto reemplazará todos tus tableros y posts actuales. ¿Continuar?'))return;
-    S.boards=_impData.boards||[];S.posts=_impData.posts||{};
-    if(_impData.user)S.user=_impData.user;
-  }else{
-    const ids=new Set(S.boards.map(b=>b.id));
-    const nuevos=(_impData.boards||[]).filter(b=>!ids.has(b.id));
-    S.boards=[...S.boards,...nuevos];
-    nuevos.forEach(b=>{S.posts[b.id]=(_impData.posts||{})[b.id]||[];});
+    // Usar modal de confirmación en lugar de confirm() nativo
+    const ov=document.createElement('div');
+    ov.className='confirm-overlay';ov.id='import-confirm';
+    ov.innerHTML=`<div class="confirm-box">
+      <div class="confirm-icon">🔄</div>
+      <div class="confirm-title">Reemplazar todo</div>
+      <div class="confirm-desc">Esto reemplazará <strong>todos</strong> tus tableros y posts con el contenido del archivo. Esta acción no se puede deshacer.</div>
+      <div class="confirm-actions">
+        <button class="btn" onclick="document.getElementById('import-confirm').remove()">Cancelar</button>
+        <button class="btn btn-d" onclick="document.getElementById('import-confirm').remove();execImportReplace()">Reemplazar</button>
+      </div>
+    </div>`;
+    document.body.appendChild(ov);
+    return;
   }
+
+  // Modo merge: detectar conflictos de versión
+  const ids=new Set(S.boards.map(b=>b.id));
+  const conflicts=importedBoards.filter(b=>ids.has(b.id)&&(b.version||1)!==(S.boards.find(x=>x.id===b.id)?.version||1));
+  if(conflicts.length){
+    toast(`⚠ ${conflicts.length} tablero(s) con conflicto de versión — se mantiene el más reciente`);
+  }
+  // Combinar: añadir nuevos, actualizar existentes si la versión importada es mayor
+  importedBoards.forEach(ib=>{
+    const ei=S.boards.findIndex(b=>b.id===ib.id);
+    if(ei===-1){
+      S.boards.push({...ib,role:'owner'});
+      S.posts[ib.id]=importedPosts[ib.id]||[];
+    }else if((ib.version||1)>(S.boards[ei].version||1)){
+      S.boards[ei]={...S.boards[ei],...ib};
+      S.posts[ib.id]=importedPosts[ib.id]||[];
+    }
+  });
   localStorage.setItem('tb_onboarded','1');
-  guardar();closeModal();renderHome();show('home');
-  toast(`✓ Tableros ${_impMode==='replace'?'reemplazados':'combinados'} correctamente`);
+  guardar();closeModal();show('home');renderHome();
+  toast('✓ Tableros combinados correctamente');
+}
+function execImportReplace(){
+  if(!_impData)return;
+  S.boards=(_impData.boards||[]).map(b=>({...b,role:b.role||'owner'}));
+  S.posts=_impData.posts||{};
+  if(_impData.user)S.user=_impData.user;
+  localStorage.setItem('tb_onboarded','1');
+  guardar();closeModal();show('home');renderHome();
+  toast('✓ Tableros reemplazados correctamente');
 }
 
 /* ── CERRAR MODAL ── */
@@ -983,10 +1292,11 @@ function aiChip(chip){
   const posts=S.posts[S.boardId]||[];
   const board=S.boards.find(b=>b.id===S.boardId);
   let msg='';
-  if(chip==='Agrupa ideas similares'){const tags=[...new Set(posts.map(p=>p.tag).filter(Boolean))];msg=tags.length?`Posts agrupados por etiqueta: ${tags.join(', ')}.`:'No hay posts con etiquetas aún.';}
+  const allTags=posts.flatMap(p=>Array.isArray(p.tags)?p.tags:(p.tag?[p.tag]:[]));
+  if(chip==='Agrupa ideas similares'){const uniq=[...new Set(allTags)];msg=uniq.length?`Posts agrupados por etiqueta: ${uniq.join(', ')}.`:'No hay posts con etiquetas aún.';}
   else if(chip==='Sugiere etiquetas')msg='En v2.0 Claude analizará cada post y sugerirá etiquetas automáticamente.';
-  else if(chip==='Genera resumen del board'){const tags=[...new Set(posts.map(p=>p.tag).filter(Boolean))];msg=posts.length?`"${board?.title}": ${posts.length} posts. Temas: ${tags.join(', ')||'sin etiquetas'}.`:'El board está vacío.';}
-  else if(chip==='Detecta temas repetidos'){const tags=posts.map(p=>p.tag).filter(Boolean);const dup=[...new Set(tags.filter((t,i)=>tags.indexOf(t)!==i))];msg=dup.length?`Temas repetidos: ${dup.join(', ')}`:'No se detectaron temas repetidos.';}
+  else if(chip==='Genera resumen del board'){const uniq=[...new Set(allTags)];msg=posts.length?`"${board?.title}": ${posts.length} posts. Temas: ${uniq.join(', ')||'sin etiquetas'}.`:'El board está vacío.';}
+  else if(chip==='Detecta temas repetidos'){const dup=[...new Set(allTags.filter((t,i)=>allTags.indexOf(t)!==i))];msg=dup.length?`Temas repetidos: ${dup.join(', ')}`:'No se detectaron temas repetidos.';}
   else msg='En v2.0 Claude sugerirá acciones concretas basadas en el contenido del board.';
   toast('✦ IA: '+msg);
 }
@@ -1058,7 +1368,7 @@ function obFin(){
   S.user={name:_ob.name||'Usuario',avatarColor:_ob.ac,role:_ob.role||'personal'};
   const tmpl=OB_TMPLS.find(t=>t.id===_ob.tmpl)||OB_TMPLS[0];
   const id='b'+Date.now();
-  S.boards.push({id,title:tmpl.name,icon:tmpl.icon,color:tmpl.color,privacy:_ob.priv,ca:n(),ua:n()});
+  S.boards.push({id,title:tmpl.name,icon:tmpl.icon,color:tmpl.color,privacy:_ob.priv,ca:n(),ua:n(),version:1,orderIndex:0,role:'owner'});
   S.posts[id]=[];
   guardar();localStorage.setItem('tb_onboarded','1');
   _ob.step=5;renderOB();
@@ -1081,9 +1391,28 @@ function svgExp(){return`<svg width="13" height="13" viewBox="0 0 14 14" fill="n
 function svgImp(){return`<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 9V1M4 4l3-3 3 3M2 10v2a1 1 0 001 1h8a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
 
 /* ── ARRANQUE ── */
-cargar();
-if(!localStorage.getItem('tb_onboarded')){show('onboarding');renderOB();}
-else{if(!S.boards.length)sembrar();show('home');renderHome();}
+let _authReady=false;
+// Verificar sesión existente al cargar (un solo punto de entrada)
+sb.auth.getSession().then(({data:{session}})=>{
+  _authReady=true;
+  if(session){
+    iniciarConSesion(session);
+  } else {
+    show('login');
+    renderLogin();
+  }
+});
+// Escuchar cambios de sesión (TOKEN_REFRESHED, SIGNED_OUT, etc.)
+sb.auth.onAuthStateChange((event, session) => {
+  if(!_authReady)return;  // ya manejado por getSession
+  if(event==='SIGNED_IN'&&session){
+    iniciarConSesion(session);
+  } else if(event==='SIGNED_OUT'){
+    show('login');renderLogin();
+  } else if(event==='TOKEN_REFRESHED'&&session){
+    S.token=session.access_token;  // actualizar token silenciosamente
+  }
+});
 </script>
 </body>
 </html>

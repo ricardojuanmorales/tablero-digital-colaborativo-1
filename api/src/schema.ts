@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id:          uuid('id').primaryKey().defaultRandom(),
@@ -19,6 +19,8 @@ export const boards = pgTable('boards', {
   privacy:       text('privacy').default('team'),
   tmpl:          text('tmpl').default('blank'),
   defaultLayout: text('default_layout').default('wall'),
+  version:       integer('version').default(1),
+  orderIndex:    integer('order_index').default(0),
   createdAt:     timestamp('created_at').defaultNow(),
   updatedAt:     timestamp('updated_at').defaultNow(),
 });
@@ -35,9 +37,11 @@ export const posts = pgTable('posts', {
   userId:    uuid('user_id').references(() => users.id),
   title:     text('title').notNull(),
   content:   text('content').default(''),
-  tag:       text('tag').default(''),
-  image:     text('image').default(''),
-  sourceUrl: text('source_url').default(''),
+  tag:        text('tag').default(''),         // mantenido por compatibilidad
+  tags:       text('tags').array().default([]),
+  image:      text('image').default(''),
+  sourceUrl:  text('source_url').default(''),
+  sourceUrl2: text('source_url_2').default(''),
   color:     text('color').default('violet'),
   kanbanCol: text('kanban_col').default(''),
   createdAt: timestamp('created_at').defaultNow(),
