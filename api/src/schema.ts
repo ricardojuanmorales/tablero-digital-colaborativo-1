@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, integer } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, text, timestamp, integer, primaryKey } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id:          uuid('id').primaryKey().defaultRandom(),
@@ -26,10 +26,10 @@ export const boards = pgTable('boards', {
 });
 
 export const boardMembers = pgTable('board_members', {
-  boardId: uuid('board_id').references(() => boards.id),
-  userId:  uuid('user_id').references(() => users.id),
+  boardId: uuid('board_id').references(() => boards.id).notNull(),
+  userId:  uuid('user_id').references(() => users.id).notNull(),
   role:    text('role').default('editor'),
-});
+}, (t) => ({ pk: primaryKey({ columns: [t.boardId, t.userId] }) }));
 
 export const posts = pgTable('posts', {
   id:        uuid('id').primaryKey().defaultRandom(),

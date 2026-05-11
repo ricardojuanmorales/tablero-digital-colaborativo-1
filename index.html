@@ -506,6 +506,12 @@ async function iniciarConSesion(session){
   S.token=session.access_token;
   const u=session.user;
   S.user={name:u.user_metadata?.full_name||u.email,avatarColor:'#4440B8',role:'personal'};
+  // Guardar/actualizar perfil en BD
+  fetch(`${API_URL}/api/users/me`,{
+    method:'POST',
+    headers:apiHeaders(),
+    body:JSON.stringify({email:u.email,name:S.user.name,avatarColor:S.user.avatarColor})
+  }).catch(()=>{});
   await cargarAPI();
   // Si API no tiene boards pero hay datos locales, ofrecer migración
   if(S.boards.length===0&&localStorage.getItem('tb_boards')){
@@ -605,18 +611,19 @@ function renderTB(){
   const logoutBtn=S.token?`<button class="btn-g" onclick="logout()" title="Cerrar sesión" style="font-size:12px">Salir</button>`:'';
   const av=`<div class="av-chip" style="background:${S.user.avatarColor};cursor:${S.token?'pointer':'default'}" title="${S.token?'Cerrar sesión':''}" onclick="${S.token?'logout()':''}">${ini}</div>`;
   const eiAllBtn=`<button class="btn-g" onclick="openEI()" style="display:flex;align-items:center;gap:5px">${svgExp()} Exportar</button>`;
+  const helpBtn=`<button class="btn-g" onclick="openGuia()" title="Guía de uso" style="padding:7px 10px">?</button>`;
   if(S.screen==='board'){
     const eiBoardBtn=`<button class="btn-g" onclick="openEI('${S.boardId}')" style="display:flex;align-items:center;gap:5px">${svgExp()} Este tablero</button>`;
     el.innerHTML=`<button class="btn-g" onclick="goHome()">← Mis tableros</button>
       ${eiBoardBtn}
       <button class="btn-g" onclick="sortPostsAZ()" title="Ordenar A→Z">A→Z</button>
       <button class="btn btn-p" onclick="openNewPost()" style="padding:7px 14px">+ Post</button>
-      ${logoutBtn}${av}`;
+      ${helpBtn}${logoutBtn}${av}`;
   }else if(S.screen==='home'){
     el.innerHTML=`${eiAllBtn}
       <button class="btn-g" onclick="sortBoardsAZ()" title="Ordenar A→Z">A→Z</button>
       <button class="btn btn-p" onclick="openNewBoard()" style="padding:7px 14px">+ Nuevo tablero</button>
-      ${logoutBtn}${av}`;
+      ${helpBtn}${logoutBtn}${av}`;
   }else{el.innerHTML='';}
 }
 
@@ -944,22 +951,26 @@ function openCtxMenu(e,id){
   e.stopPropagation();
   cerrarCtxMenu();
   const rect=e.currentTarget.getBoundingClientRect();
+  const b=S.boards.find(x=>x.id===id);
+  const isOwner=!b||b.role==='owner';
   const menu=document.createElement('div');
   menu.className='ctx-menu';
   menu.id='ctx-menu';
-  // FIX: no llamar cerrarCtxMenu dentro del onclick — se usa setTimeout
-  // para separar el cierre del menú de la ejecución de la acción
   menu.innerHTML=`
     <div class="ctx-item" data-action="open" data-id="${id}">
       <span>📂</span> Abrir tablero
     </div>
+    ${isOwner?`
     <div class="ctx-item" data-action="edit" data-id="${id}">
       <span>✏️</span> Editar
+    </div>
+    <div class="ctx-item" data-action="members" data-id="${id}">
+      <span>👥</span> Colaboradores
     </div>
     <div class="ctx-divider"></div>
     <div class="ctx-item danger" data-action="delete" data-id="${id}">
       <span>🗑</span> Eliminar tablero
-    </div>`;
+    </div>`:''}`;
   menu.addEventListener('click', function(ev){
     ev.stopPropagation();
     const item=ev.target.closest('[data-action]');
@@ -967,11 +978,11 @@ function openCtxMenu(e,id){
     const action=item.dataset.action;
     const bid=item.dataset.id;
     cerrarCtxMenu();
-    // FIX: setTimeout separa el cierre del menú de la acción siguiente
     setTimeout(()=>{
-      if(action==='open')   goBoard(bid);
-      else if(action==='edit')   openEditBoard(bid);
-      else if(action==='delete') confirmDeleteBoard(bid);
+      if(action==='open')      goBoard(bid);
+      else if(action==='edit')    openEditBoard(bid);
+      else if(action==='members') openColaboradores(bid);
+      else if(action==='delete')  confirmDeleteBoard(bid);
     },0);
   });
   document.body.appendChild(menu);
@@ -1389,6 +1400,110 @@ function svgTl(){return`<svg width="14" height="14" viewBox="0 0 14 14" fill="no
 function svgLnk(){return`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M8 1h3m0 0v3m0-3L5.5 6.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
 function svgExp(){return`<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 6l3 3 3-3M2 10v2a1 1 0 001 1h8a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
 function svgImp(){return`<svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 9V1M4 4l3-3 3 3M2 10v2a1 1 0 001 1h8a1 1 0 001-1v-2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
+
+/* ── COLABORADORES ── */
+let _colBoardId=null;
+async function openColaboradores(boardId){
+  _colBoardId=boardId;
+  const root=document.getElementById('modal-root');
+  root.innerHTML=`<div class="mbk" onclick="closeModal(event)">
+    <div class="mdl" style="max-width:480px">
+      <div class="mdl-ttl">👥 Colaboradores</div>
+      <div id="col-list" style="margin-bottom:16px">Cargando…</div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px;color:var(--text-2)">Añadir colaborador</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <input id="col-email" type="email" placeholder="correo@ejemplo.com" style="flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;background:var(--surface);color:var(--text)">
+        <select id="col-role" style="padding:8px 10px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;background:var(--surface);color:var(--text)">
+          <option value="editor">Editor</option>
+          <option value="viewer">Solo lectura</option>
+        </select>
+        <button class="btn btn-p" onclick="addColaborador()" style="padding:8px 14px;font-size:13px">Añadir</button>
+      </div>
+      <div id="col-msg" style="margin-top:8px;font-size:13px;color:#DC2626;min-height:18px"></div>
+    </div>
+  </div>`;
+  await renderColaboradores();
+}
+async function renderColaboradores(){
+  const listEl=document.getElementById('col-list');
+  if(!listEl)return;
+  try{
+    const res=await fetch(`${API_URL}/api/boards/${_colBoardId}/members`,{headers:apiHeaders()});
+    if(!res.ok){listEl.innerHTML='<span style="color:#DC2626">Error al cargar</span>';return;}
+    const members=await res.json();
+    if(!members.length){listEl.innerHTML='<span style="color:var(--text-2);font-size:13px">Sin colaboradores aún.</span>';return;}
+    listEl.innerHTML=members.map(m=>{
+      const av=`<div class="av-chip" style="background:${m.avatarColor||'#4440B8'};width:28px;height:28px;font-size:11px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;flex-shrink:0">${initials(m.name||m.email)}</div>`;
+      const roleLabel=m.role==='owner'?'Dueño':m.role==='editor'?'Editor':'Solo lectura';
+      const roleBg=m.role==='owner'?'#EDE9FE':m.role==='editor'?'#DBEAFE':'#F3F4F6';
+      const roleCol=m.role==='owner'?'#6D28D9':m.role==='editor'?'#1D4ED8':'#374151';
+      const removeBtn=m.role!=='owner'?`<button onclick="removeColaborador('${m.userId}')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:16px;padding:0 4px" title="Quitar">✕</button>`:'';
+      return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+        ${av}
+        <div style="min-width:0;flex:1">
+          <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.name||'Sin nombre')}</div>
+          <div style="font-size:11px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(m.email||'')}</div>
+        </div>
+        <span style="font-size:11px;padding:2px 7px;border-radius:20px;background:${roleBg};color:${roleCol};white-space:nowrap">${roleLabel}</span>
+        ${removeBtn}
+      </div>`;
+    }).join('');
+  }catch(e){listEl.innerHTML='<span style="color:#DC2626">Error de red</span>';}
+}
+async function addColaborador(){
+  const email=(document.getElementById('col-email')?.value||'').trim();
+  const role=document.getElementById('col-role')?.value||'editor';
+  const msgEl=document.getElementById('col-msg');
+  if(!email){if(msgEl)msgEl.textContent='Ingresa un correo electrónico.';return;}
+  if(msgEl)msgEl.textContent='';
+  try{
+    const res=await fetch(`${API_URL}/api/boards/${_colBoardId}/members`,{
+      method:'POST',headers:apiHeaders(),
+      body:JSON.stringify({email,role})
+    });
+    const data=await res.json();
+    if(!res.ok){
+      if(msgEl)msgEl.textContent=res.status===404?'Este usuario aún no tiene cuenta en Tablero.':(data.error||'Error al añadir.');
+      return;
+    }
+    if(document.getElementById('col-email'))document.getElementById('col-email').value='';
+    await renderColaboradores();
+  }catch(e){if(msgEl)msgEl.textContent='Error de red.';}
+}
+async function removeColaborador(userId){
+  try{
+    await fetch(`${API_URL}/api/boards/${_colBoardId}/members/${userId}`,{method:'DELETE',headers:apiHeaders()});
+    await renderColaboradores();
+  }catch(e){console.error(e);}
+}
+
+/* ── GUÍA DE USUARIO ── */
+function openGuia(){
+  const root=document.getElementById('modal-root');
+  root.innerHTML=`<div class="mbk" onclick="closeModal(event)">
+    <div class="mdl" style="max-width:520px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="mdl-ttl" style="margin-bottom:0">Guía de uso</div>
+        <button onclick="document.getElementById('modal-root').innerHTML=''" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-2);line-height:1">×</button>
+      </div>
+      ${[
+        ['📋','¿Qué es Tablero?','Un espacio visual colaborativo para organizar ideas, proyectos y contenido. Crea tableros, añade tarjetas con texto, imágenes y enlaces, y comparte con tu equipo.'],
+        ['🗂','Tableros','Crea tableros desde el botón <strong>+ Nuevo tablero</strong>. Personaliza el icono, color, descripción y privacidad (Personal / Equipo / Público). Exporta o importa tableros como JSON con el botón <strong>Exportar</strong>.'],
+        ['📝','Tarjetas (Posts)','Dentro de un tablero, pulsa <strong>+ Post</strong> para crear una tarjeta. Cada tarjeta tiene título, contenido, hasta 5 etiquetas, color de borde, imagen y hasta 2 enlaces externos. Cambia la vista entre Muro, Kanban y Lista.'],
+        ['👥','Colaboración','En el menú ⋯ de un tablero propio selecciona <strong>Colaboradores</strong>. Ingresa el correo del colaborador y elige su rol (Editor o Solo lectura). El colaborador verá el tablero en su sección "En colaboración" al iniciar sesión.'],
+        ['☁️','Tu cuenta','Inicia sesión con Google. Tus tableros y posts se guardan en la nube y están disponibles en cualquier dispositivo. El botón <strong>Salir</strong> cierra la sesión de forma segura.'],
+        ['⌨️','Atajos y tips','<strong>A→Z</strong> ordena tus tableros o posts alfabéticamente. En Kanban arrastra las tarjetas entre columnas. En tableros de tipo plantilla las columnas ya están predefinidas.'],
+      ].map(([icon,title,body])=>`
+        <details style="border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
+          <summary style="padding:12px 14px;cursor:pointer;font-weight:500;font-size:14px;list-style:none;display:flex;align-items:center;gap:8px">
+            <span>${icon}</span>${title}
+          </summary>
+          <div style="padding:10px 14px 14px;font-size:13px;color:var(--text-2);line-height:1.6;border-top:1px solid var(--border)">${body}</div>
+        </details>`).join('')}
+    </div>
+  </div>`;
+}
 
 /* ── ARRANQUE ── */
 let _authReady=false;

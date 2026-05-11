@@ -4,6 +4,8 @@ import { cors } from 'hono/cors';
 import { createClient } from '@supabase/supabase-js';
 import boardsRoute from './routes/boards.js';
 import postsRoute from './routes/posts.js';
+import usersRoute from './routes/users.js';
+import membersRoute from './routes/members.js';
 
 const app = new Hono();
 
@@ -32,6 +34,8 @@ app.use('/api/*', async (c, next) => {
 // Rutas
 app.route('/api/boards', boardsRoute);
 app.route('/api/boards/:boardId/posts', postsRoute);
+app.route('/api/users', usersRoute);
+app.route('/api/boards/:boardId/members', membersRoute);
 
 // Health check
 app.get('/', (c) => c.json({ status: 'ok', app: 'Tablero API' }));
