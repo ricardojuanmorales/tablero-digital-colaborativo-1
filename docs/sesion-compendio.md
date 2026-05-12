@@ -114,3 +114,100 @@ Añadir gestión de colaboradores por correo electrónico y una guía de usuario
 2. Verificar que colaboradores funcionan end-to-end con dos cuentas reales
 3. Considerar notificaciones por email al invitar colaboradores (Resend)
 4. Considerar edición colaborativa en tiempo real (WebSockets)
+
+---
+
+---
+
+# Compendio de Sesión — Tablero v1.5 (continuación)
+**Fecha:** 2026-05-12  
+**Duración estimada:** ~1.5 horas  
+**Rama:** `main`
+
+---
+
+## Objetivo de la sesión
+
+Diagnosticar y corregir el problema de login con Google OAuth que impedía entrar al tablero.
+
+---
+
+## Estado al inicio de la sesión
+
+| Elemento | Estado |
+|---|---|
+| Tablas en Supabase | ✅ Verificadas — todas vacías (0 filas) |
+| Google OAuth | ❌ No redirigía al hacer clic |
+| API en Render | ❌ Devolvía 500 en `/api/boards` |
+| Frontend en GitHub Pages | ✅ Cargando (v1.5) |
+
+---
+
+## Diagnóstico realizado
+
+### Problema 1 — OAuth redirect a 404
+- Supabase redirigía a `https://ricardojuanmorales.github.io/` (raíz) → 404
+- **Causa:** Site URL en Supabase configurado sin el path del repo
+- **Fix (manual en dashboard):** Site URL → `https://ricardojuanmorales.github.io/tablero-digital-colaborativo-1/`
+
+### Problema 2 — Render API devuelve 500
+- `GET /api/boards` devolvía 500 con token válido
+- **Causa A:** Variables de entorno en Render apuntaban a BD/proyecto Supabase viejo
+- **Fix (manual en Render dashboard):** Actualizar `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+- **Causa B:** `db.ts` no pasaba `ssl: 'require'` al cliente postgres — Supabase lo exige
+- **Fix (código):** `postgres(DATABASE_URL, { ssl: 'require' })`
+
+### Problema 3 — Typo en `api/.env`
+- `DATABASE_URL` tenía `ppostgresql://` (doble `p`)
+- **Fix:** Corregido a `postgresql://`
+
+---
+
+## Trabajo realizado
+
+### `api/src/db.ts`
+```typescript
+// Antes:
+const client = postgres(process.env.DATABASE_URL!);
+// Después:
+const client = postgres(process.env.DATABASE_URL!, { ssl: 'require' });
+```
+
+### `api/.env`
+- Corregido typo: `ppostgresql://` → `postgresql://`
+
+### Render dashboard (manual)
+- Actualizadas env vars: `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`
+
+### Supabase dashboard (manual)
+- Site URL corregido a `https://ricardojuanmorales.github.io/tablero-digital-colaborativo-1/`
+- Redirect URLs añadida: `https://ricardojuanmorales.github.io/tablero-digital-colaborativo-1/`
+
+---
+
+## Commits de esta sesión
+
+| Hash | Mensaje |
+|---|---|
+| `75b9ba2` | fix: añadir ssl:require al cliente de postgres para Supabase |
+
+---
+
+## Estado al final de la sesión
+
+| Elemento | Estado |
+|---|---|
+| Código en GitHub | ✅ Actualizado |
+| API en Render | ✅ Respondiendo 401 sin token (DB conecta) |
+| OAuth redirect | ✅ Site URL corregido en Supabase |
+| Login end-to-end | ⚠️ No verificado — sesión cerrada antes de confirmar |
+| Datos en BD | ⚠️ 0 filas — el login poblará `users` al completarse |
+
+---
+
+## Pendiente para próxima sesión
+
+1. **Verificar login end-to-end**: hacer login con Google → confirmar que entra al home
+2. Confirmar que `public.users` se pobla tras el primer login
+3. Confirmar que boards se crean vía API correctamente
+4. Verificar colaboradores end-to-end con dos cuentas

@@ -7,7 +7,7 @@
 Continuamos el desarrollo de "Tablero" — app de organización visual colaborativa 
 (estilo Padlet/Miro). Lee el archivo docs/primer-continuidad.md antes de comenzar.
 
-## Estado actual del proyecto (2026-05-11)
+## Estado actual del proyecto (2026-05-12)
 
 Stack: HTML + CSS + JS vanilla (index.html monolito ~1,500 líneas) + API Hono v4 + 
 Drizzle ORM + Supabase PostgreSQL. Deploy: API en Render, frontend en GitHub Pages.
@@ -29,11 +29,23 @@ URLs en producción:
 ✅ Home con sección "Creados por mí" y "En colaboración"
 ✅ README actualizado a v1.5
 
-## Pendiente inmediato
+## Fixes aplicados en sesión 2026-05-12
 
-⚠️ La BD tiene 0 filas porque el usuario principal (ricardo.morales1@upr.edu) 
-   no ha hecho re-login desde el fix del race condition (await users/me).
-   Verificar primero: hacer logout + login → aceptar migración de datos locales.
+✅ Supabase Site URL corregido → apunta al path correcto de GitHub Pages
+✅ Render env vars actualizadas → DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY
+✅ db.ts: añadido ssl:require al cliente postgres (Supabase lo exige)
+✅ api/.env: corregido typo ppostgresql → postgresql
+
+## Pendiente inmediato (verificar primero)
+
+⚠️ Login end-to-end NO fue verificado en la sesión anterior — la sesión
+   se cerró antes de confirmar. Verificar haciendo login con Google en:
+   https://ricardojuanmorales.github.io/tablero-digital-colaborativo-1
+
+⚠️ La BD tiene 0 filas. El primer login post-fix debe:
+   1. Crear fila en public.users
+   2. Mostrar modal de migración (si hay datos en localStorage)
+   3. Cargar/crear tableros de ejemplo
 
 ⚠️ Probar end-to-end los colaboradores con dos cuentas reales (@upr.edu).
 
@@ -41,11 +53,12 @@ URLs en producción:
 
 - index.html — todo el frontend
 - api/src/index.ts — servidor y rutas
+- api/src/db.ts — conexión DB (ssl:require añadido)
 - api/src/schema.ts — schema Drizzle
 - api/src/routes/members.ts — colaboradores (GET/POST/DELETE)
 - api/src/routes/users.ts — upsert perfil + by-email
 - docs/primer-continuidad.md — contexto completo del proyecto
-- docs/sesion-compendio.md — historial detallado de esta sesión
+- docs/sesion-compendio.md — historial detallado de sesiones
 
 ## Próximas features candidatas (v2.0)
 

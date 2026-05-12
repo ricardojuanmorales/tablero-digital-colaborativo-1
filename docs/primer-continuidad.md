@@ -1,5 +1,5 @@
 # Primer de Continuidad — Tablero v1.5
-**Última actualización:** 2026-05-11
+**Última actualización:** 2026-05-12
 
 Este documento es el punto de partida para cualquier sesión futura. Léelo antes de tocar código.
 
@@ -42,7 +42,7 @@ App de organización visual colaborativa (estilo Padlet/Miro). Frontend vanilla 
 └── api/
     ├── src/
     │   ├── index.ts              ← Servidor, CORS, middleware JWT
-    │   ├── db.ts                 ← Conexión Drizzle ↔ Supabase
+    │   ├── db.ts                 ← Conexión Drizzle ↔ Supabase (ssl:require)
     │   ├── schema.ts             ← Definición de tablas
     │   └── routes/
     │       ├── boards.ts         ← CRUD tableros
@@ -89,6 +89,24 @@ Si boards vacíos + hay datos en localStorage → modal migración
 ```
 
 El middleware de la API extrae `userId` del JWT via `supabase.auth.getUser(token)`.
+
+---
+
+## Configuración crítica (Supabase dashboard)
+
+- **Site URL:** `https://ricardojuanmorales.github.io/tablero-digital-colaborativo-1/`
+- **Redirect URLs:** `https://ricardojuanmorales.github.io/tablero-digital-colaborativo-1/`
+- Estas deben estar en **Authentication → URL Configuration**
+
+## Configuración crítica (Render dashboard)
+
+Las siguientes env vars deben estar seteadas en el servicio `tablero-api`:
+
+| Variable | Valor |
+|---|---|
+| `SUPABASE_URL` | `https://azklaodfcesmhaidvmwm.supabase.co` |
+| `SUPABASE_ANON_KEY` | (ver api/.env local) |
+| `DATABASE_URL` | `postgresql://postgres:[password]@db.azklaodfcesmhaidvmwm.supabase.co:5432/postgres` |
 
 ---
 
@@ -149,7 +167,7 @@ const S = {
 ## Estado actual de la BD
 
 - **Schema:** ✅ Completo y sincronizado
-- **Datos:** ⚠️ 0 filas — el usuario principal (`ricardo.morales1@upr.edu`) debe hacer re-login para crear su perfil en `public.users` y migrar sus tableros a Supabase
+- **Datos:** ⚠️ 0 filas — el primer login post-fix poblará `public.users` y permitirá usar la app
 
 ---
 
